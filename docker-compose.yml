@@ -1,0 +1,47 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: ./docker/app/Dockerfile
+        image: app-movies-auth-img
+        restart: on-failure
+        env_file:
+            - ./.envs/${ENVIRONMENT:-production}/.env
+        environment:
+            - ENVIRONMENT=${ENVIRONMENT:-production}
+            - FLASK_APP=manage.py
+            - COMPOSE_MODE=on
+            - POSTGRES_HOST=postgres
+            - REDIS_HOST=redis
+            - CREATE_SUPER_USER=True
+        depends_on:
+            - postgres
+            - redis
+    postgres:
+        build:
+            context: .
+            dockerfile: ./docker/postgres/Dockerfile
+        restart: on-failure
+        env_file:
+            - ./.envs/${ENVIRONMENT:-production}/.env
+    redis:
+        build:
+            context: .
+            dockerfile: ./docker/redis/Dockerfile
+        restart: on-failure
+        env_file:
+            - ./.envs/${ENVIRONMENT:-production}/.env
+    nginx:
+        build:
+            context: .
+            dockerfile: ./docker/nginx/Dockerfile
+        restart: on-failure
+        env_file:
+            - ./.envs/${ENVIRONMENT:-production}/.env
+        environment:
+            - APP_HOST=app
+        volumes:
+            - ./src/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+            - ./src/nginx/templates:/etc/nginx/templates:ro
+        depends_on:
+            - app

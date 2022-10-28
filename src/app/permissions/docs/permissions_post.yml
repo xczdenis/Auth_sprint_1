@@ -1,0 +1,35 @@
+Создание нового разрешения.
+Запрос должен содержать заголовок Authorization=Bearer <access_token>.
+Маршрут разрешен только для суперпользователей.
+Маршрут создает новое разрешение.
+---
+tags:
+    - Permissions
+security:
+    -   bearer: [ ]
+parameters:
+    -   name: body
+        in: body
+        required: true
+        schema:
+            required:
+                - name
+                - codename
+            properties:
+                name:
+                    type: string
+                    description: Имя нового разрешения
+                codename:
+                    type: string
+                    description: Уникальный код нового разрешения
+responses:
+    201:
+        description: Новое разрешение успешно создано
+        schema:
+            $ref: '#/definitions/PermissionsDetail'
+    401:
+        $ref: '#/definitions/Response401_access'
+    403:
+        $ref: '#/definitions/Response403'
+    422:
+        $ref: '#/definitions/Response422_access'

@@ -1,0 +1,39 @@
+Проверка наличия разрешений.
+Запрос должен содержать заголовок Authorization=Bearer <access_token>.
+Выполняется проверка наличия разрешений у пользователя.
+Тело запроса должно содержать параметр `permissions` - массив кодов разрешений, наличие которых
+необходимо проверить у пользователя.
+Тело запроса может содержать параметр `conditions` = 'or' или 'and'. Если в массиве кодов разрешений
+больше одного элемента и значение параметра `conditions` = 'and', то проверяется наличие всех
+указанных разрешений у пользователя. Если значение параметра `conditions` = 'or', то проверяется
+наличие хотя бы одного из указанных разрешений.
+---
+tags:
+    - Users
+security:
+    -   bearer: [ ]
+parameters:
+    -   name: permissions
+        in: body
+        required: true
+        type: array
+        description: Array of permission's codenames
+        example: ['series', 'sport']
+        items:
+            type: string
+responses:
+    200:
+        description: Результат проверки наличия разрешений у пользователя
+        schema:
+            type: object
+            properties:
+                has_perms:
+                    type: boolean
+    400:
+        description: Не корректные параметры в теле запроса
+        schema:
+            $ref: '#/definitions/DefaultMsgResponse'
+        examples:
+            msg: "The 'permissions' parameter was not provided"
+    401:
+        $ref: '#/definitions/Response401_access'

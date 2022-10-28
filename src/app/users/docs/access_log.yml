@@ -1,0 +1,34 @@
+Журнал доступов пользователя.
+Запрос должен содержать заголовок Authorization=Bearer <access_token>.
+Маршрут возвращает все записи о входах пользователя с указанием времени входа и user_agent.
+---
+tags:
+    - Users
+security:
+    -   bearer: [ ]
+definitions:
+    AccessLogResponse:
+        type: object
+        properties:
+            data:
+                type: array
+                items:
+                    $ref: '#/definitions/EntryRecord'
+    EntryRecord:
+        type: object
+        properties:
+            user_agent:
+                type: string
+            created:
+                type: string
+                format: date-time
+                description: Дата и время входа
+responses:
+    200:
+        description: Список, содержащий записи о входах с указанием даты входа и user_agent
+        schema:
+            $ref: '#/definitions/AccessLogResponse'
+    401:
+        $ref: '#/definitions/Response401_access'
+    422:
+        $ref: '#/definitions/Response422_access'

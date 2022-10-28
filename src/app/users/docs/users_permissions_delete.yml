@@ -1,0 +1,45 @@
+Удаление разрешений у пользователей.
+Запрос должен содержать заголовок Authorization=Bearer <access_token>.
+Выполняется удаление разрешений для пользователей.
+Тело запроса должно содержать параметр `users_permissions` - это словарь, ключами которого являются
+`id` пользователей, а значениями - массив `id` разрешений, которые должны быть удалены у пользователя.
+---
+tags:
+    - Users
+security:
+    -   bearer: [ ]
+parameters:
+    -   name: users_permissions
+        in: body
+        required: true
+        schema:
+            required:
+                - <user_id>
+            properties:
+                <user_id>:
+                    type: array
+                    description: Array of permission's id
+                    example: ['permission_id_1', 'permission_id_2']
+                    items:
+                        type: string
+responses:
+    200:
+        description: Разрешения пользователей успешно обновлены
+        schema:
+            $ref: '#/definitions/DefaultMsgResponse'
+    400:
+        description: Не корректные параметры в теле запроса
+        schema:
+            $ref: '#/definitions/DefaultMsgResponse'
+        examples:
+            msg: "The 'users_permissions' parameter is empty"
+    401:
+        $ref: '#/definitions/Response401_access'
+    403:
+        $ref: '#/definitions/Response403'
+    404:
+        description: Пользователь по переданному id не найден
+        schema:
+            $ref: '#/definitions/DefaultMsgResponse'
+    422:
+        $ref: '#/definitions/Response422_access'

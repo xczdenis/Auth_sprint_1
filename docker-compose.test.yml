@@ -1,0 +1,17 @@
+services:
+    tests_app:
+        build:
+            context: .
+            dockerfile: ./docker/tests/Dockerfile
+        env_file:
+            - ./.envs/${ENVIRONMENT:-production}/.env
+        environment:
+            - ENVIRONMENT=${ENVIRONMENT:-production}
+            - COMPOSE_MODE=on
+            - APP_HOST=app
+            - REDIS_HOST=redis
+            - POSTGRES_HOST=postgres
+        depends_on:
+            - postgres
+            - redis
+            - app

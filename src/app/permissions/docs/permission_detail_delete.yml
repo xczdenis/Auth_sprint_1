@@ -1,0 +1,24 @@
+Удаление разрешения.
+Запрос должен содержать заголовок Authorization=Bearer <access_token>.
+Маршрут разрешен только для суперпользователей.
+Маршрут удаляет существующее разрешение.
+---
+tags:
+    - Permissions
+security:
+    -   bearer: [ ]
+responses:
+    200:
+        description: Разрешение успешно удалено
+        schema:
+            $ref: '#/definitions/DefaultMsgResponse'
+    401:
+        $ref: '#/definitions/Response401_access'
+    403:
+        $ref: '#/definitions/Response403'
+    404:
+        description: Разрешение по переданному id не найдено
+        schema:
+            $ref: '#/definitions/DefaultMsgResponse'
+    422:
+        $ref: '#/definitions/Response422_access'

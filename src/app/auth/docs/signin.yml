@@ -1,0 +1,45 @@
+Авторизация существующего пользователя.
+Если переданные логин и пароль корректны, то возвращается ответ,
+содержащий пару access_token и refresh_token.
+---
+tags:
+    - Auth
+parameters:
+    -   name: body
+        in: body
+        required: true
+        schema:
+            required:
+                - login
+                - password
+            properties:
+                login:
+                    type: string
+                    description: User login
+                password:
+                    type: string
+                    description: User password
+responses:
+    201:
+        description: Пользователь успешно авторизован
+        schema:
+            type: object
+            properties:
+                access_token:
+                    type: string
+                    description: Access token
+                refresh_token:
+                    type: string
+                    description: Refresh token
+    400:
+        description: В запросе нет одного из полей (или оно не заполнено) - login/password
+        schema:
+            $ref: '#/definitions/DefaultMsgResponse'
+        examples:
+            msg: "Login or password was not provided"
+    401:
+        description: Логин и/или пароль не корректны
+        schema:
+            $ref: '#/definitions/DefaultMsgResponse'
+        examples:
+            msg: "Login or password is incorrect"

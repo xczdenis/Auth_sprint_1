@@ -1,0 +1,40 @@
+Регистрация нового пользователя.
+Будет создан новый пользователь по переданным учетным данным.
+Если пользователь с таким логином уже существует, то вернется код 409.
+---
+tags:
+    - Auth
+parameters:
+    -   name: body
+        in: body
+        required: true
+        schema:
+            required:
+                - login
+                - password
+            properties:
+                login:
+                    type: string
+                    description: New user's login
+                password:
+                    type: string
+                    description: New user's password
+responses:
+    201:
+        description: Новый пользователь успешно создан
+        schema:
+            $ref: '#/definitions/DefaultMsgResponse'
+        examples:
+            msg: "OK"
+    400:
+        description: В запросе нет одного из полей (или оно не заполнено) - login/password
+        schema:
+            $ref: '#/definitions/DefaultMsgResponse'
+        examples:
+            msg: "Login or password was not provided"
+    409:
+        description: Пользователь с указанным логином уже существует
+        schema:
+            $ref: '#/definitions/DefaultMsgResponse'
+        examples:
+            msg: "The user with the provided login already exists"

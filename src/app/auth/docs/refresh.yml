@@ -1,0 +1,19 @@
+Генерация нового access_token по переданному refresh_token.
+Запрос должен содержать заголовок Authorization=Bearer <refresh_token>.
+---
+tags:
+    - Auth
+security:
+    -   bearer: [ ]
+responses:
+    201:
+        description: Новый access_token успешно сгенерирован
+        schema:
+            type: object
+            properties:
+                access_token:
+                    type: string
+    401:
+        $ref: '#/definitions/Response401_refresh'
+    422:
+        $ref: '#/definitions/Response422_refresh'
