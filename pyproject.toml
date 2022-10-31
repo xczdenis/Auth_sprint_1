@@ -18,6 +18,7 @@ Flask-JWT-Extended = "^4.4.4"
 redis = "^4.3.4"
 flasgger = "^0.9.5"
 gevent = "^22.10.1"
+pydantic = "^1.10.2"
 
 
 [tool.poetry.group.lint.dependencies]
