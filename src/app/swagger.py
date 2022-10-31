@@ -1,10 +1,11 @@
-swagger_config = {"specs_route": "/openapi/"}
+swagger_config = {"specs_route": "/api/v1/swagger/"}
 
 swagger_template = {
     "info": {
         "title": "Auth service for movies",
         "version": "1.0",
     },
+    "basePath": "/api/v1",
     "securityDefinitions": {
         "bearer": {
             "description": """Для защищенных маршрутов, в запросе должен передаваться

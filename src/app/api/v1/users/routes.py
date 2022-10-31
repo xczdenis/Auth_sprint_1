@@ -3,9 +3,9 @@ from flask import jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from app import db
+from app.api.v1.users import bp
 from app.decorators import is_superuser_required
 from app.models import Permission, User
-from app.users import bp
 
 
 @bp.route("/", methods=["GET"])

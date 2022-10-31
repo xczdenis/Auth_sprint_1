@@ -10,7 +10,7 @@ from flask_jwt_extended import (
 )
 
 from app import db, jwt_redis_blocklist
-from app.auth import bp
+from app.api.v1.auth import bp
 from app.models import User
 
 

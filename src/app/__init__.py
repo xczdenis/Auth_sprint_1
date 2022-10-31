@@ -1,6 +1,6 @@
 import redis
 from flasgger import Swagger
-from flask import Flask
+from flask import Blueprint, Flask
 from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
@@ -38,13 +38,12 @@ def create_app():
     swagger.init_app(app)
     swagger.template = swagger_template
 
-    from app.auth import bp as auth_bp
-    from app.permissions import bp as permissions_bp
-    from app.users import bp as users_bp
+    from app.api.v1 import bp as api_v1_bp
 
-    app.register_blueprint(auth_bp, url_prefix="/auth")
-    app.register_blueprint(users_bp, url_prefix="/users")
-    app.register_blueprint(permissions_bp, url_prefix="/permissions")
+    api = Blueprint("api", __name__, url_prefix="/api")
+    api.register_blueprint(api_v1_bp)
+
+    app.register_blueprint(api)
 
     return app
 
