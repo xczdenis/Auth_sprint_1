@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from flasgger import swag_from
 from flask import current_app, jsonify, request
 from flask_jwt_extended import (
@@ -21,11 +23,11 @@ def signup():
     password = request.json.get("password")
 
     if not login or not password:
-        return jsonify(msg="Login or password was not provided"), 400
+        return jsonify(msg="Login or password was not provided"), HTTPStatus.BAD_REQUEST
 
     user = User.query.filter_by(login=login).first()
     if user:
-        return jsonify(msg="The user with the provided login already exists"), 409
+        return jsonify(msg="The user with the provided login already exists"), HTTPStatus.CONFLICT
 
     new_user = User()
     new_user.login = login
@@ -34,7 +36,7 @@ def signup():
     db.session.add(new_user)
     db.session.commit()
 
-    return jsonify(new_user.to_dict()), 201
+    return jsonify(new_user.to_dict()), HTTPStatus.CREATED
 
 
 @bp.route("/signin/", methods=["POST"])
@@ -44,11 +46,11 @@ def signin():
     password = request.json.get("password")
 
     if not login or not password:
-        return jsonify(msg="Login or password was not provided"), 400
+        return jsonify(msg="Login or password was not provided"), HTTPStatus.BAD_REQUEST
 
     user = User.query.filter_by(login=login).first()
     if not user or not user.check_password(raw_password=password):
-        return jsonify(msg="Login or password is incorrect"), 401
+        return jsonify(msg="Login or password is incorrect"), HTTPStatus.UNAUTHORIZED
 
     identity = user.id
 
@@ -62,7 +64,7 @@ def signin():
 
     user.log_entry(**request.headers)
 
-    return jsonify(access_token=access_token, refresh_token=refresh_token), 201
+    return jsonify(access_token=access_token, refresh_token=refresh_token), HTTPStatus.CREATED
 
 
 @bp.route("/refresh/", methods=["POST"])
@@ -76,7 +78,7 @@ def refresh():
         "refresh_token_jti": claims.get("jti"),
     }
     access_token = create_access_token(identity=identity, additional_claims=additional_claims)
-    return jsonify(access_token=access_token), 201
+    return jsonify(access_token=access_token), HTTPStatus.CREATED
 
 
 @bp.route("/logout/", methods=["POST"])
@@ -87,7 +89,7 @@ def logout():
 
     user = User.query.filter_by(id=identity).first()
     if not user:
-        return jsonify(msg="Token is incorrect"), 401
+        return jsonify(msg="Token is incorrect"), HTTPStatus.UNAUTHORIZED
 
     claims = get_jwt()
     jti = claims.get("jti")

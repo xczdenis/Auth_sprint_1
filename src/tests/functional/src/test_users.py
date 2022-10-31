@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from flask_jwt_extended import create_access_token
 
 
@@ -8,7 +10,7 @@ def test_access_log(test_client, unique_saved_user):
         "/users/access_log/",
         headers={"Authorization": f"Bearer {access_token}"},
     )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
 
 
 def test_change_password(test_client, unique_saved_user):
@@ -20,10 +22,10 @@ def test_change_password(test_client, unique_saved_user):
         json={"old_password": pwd, "new_password": new_pwd},
         headers={"Authorization": f"Bearer {access_token}"},
     )
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
 
     response = test_client.post("/auth/signin/", json={"login": user.login, "password": pwd})
-    assert response.status_code == 401
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
 
     response = test_client.post("/auth/signin/", json={"login": user.login, "password": new_pwd})
-    assert response.status_code == 201
+    assert response.status_code == HTTPStatus.CREATED

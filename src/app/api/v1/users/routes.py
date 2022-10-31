@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 from flasgger import swag_from
 from flask import jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
@@ -37,21 +39,21 @@ def change_password():
     new_password = request.json.get("new_password")
 
     if not old_password or not new_password:
-        return jsonify(msg="Old password or new password was not provided"), 400
+        return jsonify(msg="Old password or new password was not provided"), HTTPStatus.BAD_REQUEST
 
     identity = get_jwt_identity()
     user = User.query.filter_by(id=identity).first()
     if not user:
-        return jsonify(msg="Token is incorrect"), 401
+        return jsonify(msg="Token is incorrect"), HTTPStatus.UNAUTHORIZED
 
     if not user.check_password(raw_password=old_password):
-        return jsonify(msg="Old password is incorrect"), 401
+        return jsonify(msg="Old password is incorrect"), HTTPStatus.UNAUTHORIZED
 
     user.set_password(new_password)
 
     db.session.commit()
 
-    return jsonify(msg="The password has been changed"), 200
+    return jsonify(msg="The password has been changed"), HTTPStatus.OK
 
 
 @bp.route("/permissions/", methods=["PUT", "DELETE"])
@@ -62,23 +64,29 @@ def change_password():
 def users_permissions():
     users_permissions_data = request.json.get("users_permissions")
     if users_permissions_data is None:
-        return jsonify(msg="The 'users_permissions' parameter was not provided"), 400
+        return (
+            jsonify(msg="The 'users_permissions' parameter was not provided"),
+            HTTPStatus.BAD_REQUEST,
+        )
     elif not users_permissions_data:
-        return jsonify(msg="The 'users_permissions' parameter is empty"), 400
+        return jsonify(msg="The 'users_permissions' parameter is empty"), HTTPStatus.BAD_REQUEST
     elif not isinstance(users_permissions_data, dict):
-        return jsonify(msg="The 'users_permissions' parameter should be a dict"), 400
+        return (
+            jsonify(msg="The 'users_permissions' parameter should be a dict"),
+            HTTPStatus.BAD_REQUEST,
+        )
 
     for k, v in users_permissions_data.items():
         if not isinstance(v, list):
-            return jsonify(msg="The 'permissions' should be an array"), 400
+            return jsonify(msg="The 'permissions' should be an array"), HTTPStatus.BAD_REQUEST
         for permission_id in set(v):
             if not isinstance(permission_id, str):
-                return jsonify(msg="The 'permission id' should be a string"), 400
+                return jsonify(msg="The 'permission id' should be a string"), HTTPStatus.BAD_REQUEST
 
     for user_id, permissions_ids in users_permissions_data.items():
         user = User.query.filter_by(id=user_id).first()
         if not user:
-            return jsonify(msg="User not found"), 404
+            return jsonify(msg="User not found"), HTTPStatus.NOT_FOUND
 
         updated_user_permissions = user.permissions[:]
         permissions_from_request = (
@@ -95,7 +103,7 @@ def users_permissions():
 
         db.session.commit()
 
-    return jsonify(msg="Users permissions updated successfully"), 200
+    return jsonify(msg="Users permissions updated successfully"), HTTPStatus.OK
 
 
 @bp.route("/has_perms/", methods=["POST"])
@@ -105,21 +113,24 @@ def has_perms():
     permissions_codenames = request.json.get("permissions")
     condition = request.json.get("condition", "AND")
     if permissions_codenames is None:
-        return jsonify(msg="The 'permissions' parameter was not provided"), 400
+        return jsonify(msg="The 'permissions' parameter was not provided"), HTTPStatus.BAD_REQUEST
     elif not permissions_codenames:
-        return jsonify(msg="The 'permissions' parameter is empty"), 400
+        return jsonify(msg="The 'permissions' parameter is empty"), HTTPStatus.BAD_REQUEST
     elif not isinstance(permissions_codenames, list):
-        return jsonify(msg="The 'permissions' parameter should be an array"), 400
+        return jsonify(msg="The 'permissions' parameter should be an array"), HTTPStatus.BAD_REQUEST
 
     for i in range(len(permissions_codenames)):
         if not isinstance(permissions_codenames[i], str):
-            return jsonify(msg="The 'permission codename' should be a string"), 400
+            return (
+                jsonify(msg="The 'permission codename' should be a string"),
+                HTTPStatus.BAD_REQUEST,
+            )
         permissions_codenames[i] = permissions_codenames[i].lower()
 
     identity = get_jwt_identity()
     user = User.query.filter_by(id=identity).first()
     if not user:
-        return jsonify(msg="Token is incorrect"), 401
+        return jsonify(msg="Token is incorrect"), HTTPStatus.UNAUTHORIZED
 
     permissions = (
         Permission.query.join(Permission.users)
@@ -133,4 +144,4 @@ def has_perms():
     elif condition.upper() == "OR":
         user_has_perms = len(permissions) > 0
 
-    return jsonify(has_perms=user_has_perms), 200
+    return jsonify(has_perms=user_has_perms), HTTPStatus.OK

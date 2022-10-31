@@ -1,4 +1,5 @@
 from functools import wraps
+from http import HTTPStatus
 from typing import Any
 
 from flask import current_app, jsonify, request
@@ -13,7 +14,7 @@ def superuser_required(request_methods: list[str] | None = None) -> Any:
                 claims = get_jwt()
                 is_superuser = claims.get("is_superuser")
                 if not is_superuser:
-                    return jsonify(msg="Permission denied"), 403
+                    return jsonify(msg="Permission denied"), HTTPStatus.FORBIDDEN
             return current_app.ensure_sync(fn)(*args, **kwargs)
 
         return decorator
