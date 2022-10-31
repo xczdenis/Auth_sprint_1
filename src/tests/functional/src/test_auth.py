@@ -102,7 +102,7 @@ class TestRefresh:
 
 class TestLogout:
     def test_method_not_allowed(self, test_client):
-        response = test_client.get("/auth/logout/", json={})
+        response = test_client.get("/auth/logout/", params={})
         assert response.status_code == HTTPStatus.METHOD_NOT_ALLOWED
 
     def test_incorrect_token(self, test_client):
