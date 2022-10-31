@@ -5,7 +5,7 @@ from flask_jwt_extended import JWTManager
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
-from app.swagger import template
+from app.swagger import swagger_config, swagger_template
 from config import settings
 
 db = SQLAlchemy()
@@ -23,6 +23,7 @@ def check_if_token_is_revoked(jwt_header, jwt_payload: dict):
 
 
 swagger = Swagger()
+swagger.config.update(swagger_config)
 
 
 def create_app():
@@ -35,7 +36,7 @@ def create_app():
     jwt.init_app(app)
 
     swagger.init_app(app)
-    swagger.template = template
+    swagger.template = swagger_template
 
     from app.auth import bp as auth_bp
     from app.permissions import bp as permissions_bp

@@ -1,4 +1,6 @@
-template = {
+swagger_config = {"specs_route": "/openapi/"}
+
+swagger_template = {
     "info": {
         "title": "Auth service for movies",
         "version": "1.0",
