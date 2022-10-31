@@ -1,11 +1,11 @@
 from functools import wraps
-from typing import Any, Optional
+from typing import Any
 
 from flask import current_app, jsonify, request
 from flask_jwt_extended import get_jwt
 
 
-def is_superuser_required(request_methods: Optional[list[str]] = None) -> Any:
+def superuser_required(request_methods: list[str] | None = None) -> Any:
     def wrapper(fn):
         @wraps(fn)
         def decorator(*args, **kwargs):

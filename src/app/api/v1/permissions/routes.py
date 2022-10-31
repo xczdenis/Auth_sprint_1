@@ -4,13 +4,13 @@ from flask_jwt_extended import jwt_required
 
 from app import db
 from app.api.v1.permissions import bp
-from app.decorators import is_superuser_required
+from app.decorators import superuser_required
 from app.models import Permission
 
 
 @bp.route("/", methods=["GET", "POST"])
 @jwt_required()
-@is_superuser_required()
+@superuser_required()
 @swag_from("docs/permissions_get.yml", methods=["GET"])
 @swag_from("docs/permissions_post.yml", methods=["POST"])
 def permissions():
@@ -47,7 +47,7 @@ def permissions():
 
 @bp.route("/<id>/", methods=["GET", "DELETE", "PATCH"])
 @jwt_required()
-@is_superuser_required()
+@superuser_required()
 @swag_from("docs/permission_detail_get.yml", methods=["GET"])
 @swag_from("docs/permission_detail_delete.yml", methods=["DELETE"])
 @swag_from("docs/permission_detail_patch.yml", methods=["PATCH"])

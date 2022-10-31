@@ -4,13 +4,13 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from app import db
 from app.api.v1.users import bp
-from app.decorators import is_superuser_required
+from app.decorators import superuser_required
 from app.models import Permission, User
 
 
 @bp.route("/", methods=["GET"])
 @jwt_required()
-@is_superuser_required()
+@superuser_required()
 def users():
     return jsonify([item.to_dict() for item in User.query.all()])
 
@@ -56,7 +56,7 @@ def change_password():
 
 @bp.route("/permissions/", methods=["PUT", "DELETE"])
 @jwt_required()
-@is_superuser_required()
+@superuser_required()
 @swag_from("docs/users_permissions_put.yml", methods=["PUT"])
 @swag_from("docs/users_permissions_delete.yml", methods=["DELETE"])
 def users_permissions():
