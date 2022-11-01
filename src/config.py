@@ -2,7 +2,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
-from pydantic import BaseSettings, Field
+from pydantic import BaseModel, BaseSettings, Field
 
 BASE_DIR = Path(__file__).resolve().parent
 ROOT_DIR = Path(__file__).resolve().parent.parent
@@ -19,6 +19,12 @@ def get_db_url(config):
             db=config.POSTGRES_DB,
         )
     return db_url
+
+
+class Paginator(BaseModel):
+    page_size: int = 20
+    page_size_query_path: str = "page[size]"
+    page_number_query_path: str = "page[number]"
 
 
 class Settings(BaseSettings):
@@ -38,6 +44,7 @@ class Settings(BaseSettings):
     APP_PORT: int
     REDIS_HOST: str
     REDIS_PORT: int
+    PAGINATOR: Paginator = Paginator()
 
     class Config:
         env = os.getenv("ENVIRONMENT", "development")

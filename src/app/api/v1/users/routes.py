@@ -6,29 +6,29 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from app import db
 from app.api.v1.users import bp
-from app.decorators import superuser_required
+from app.decorators import paginate, superuser_required
 from app.models import Permission, User
 
 
 @bp.route("/", methods=["GET"])
 @jwt_required()
 @superuser_required()
+@paginate()
 def users():
-    return jsonify([item.to_dict() for item in User.query.all()])
+    return [item.to_dict() for item in User.query.all()]
 
 
 @bp.route("/access_log/")
 @jwt_required()
 @swag_from("docs/access_log.yml")
+@paginate()
 def access_log():
+    user_entry_records = []
     identity = get_jwt_identity()
-    data = []
-
     user = User.query.filter_by(id=identity).first()
     if user:
-        data = user.entry_records
-
-    return jsonify(data=[item.to_dict() for item in data])
+        user_entry_records = user.entry_records
+    return [item.to_dict() for item in user_entry_records]
 
 
 @bp.route("/change_password/", methods=["POST"])
