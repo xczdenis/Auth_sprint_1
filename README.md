@@ -1,3 +1,7 @@
+<h2 align="center">Для Yandex-practicum</h2>
+Ссылка на репозиторий: [Auth_sprint_1](https://github.com/xczdenis/Auth_sprint_1)
+
+
 <h2 align="center">Auth-movies</h2>
 
 
