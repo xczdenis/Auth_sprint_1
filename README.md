@@ -1,5 +1,8 @@
 <h2 align="center">Для Yandex-practicum</h2>
+
+
 Ссылка на репозиторий: [Auth_sprint_1](https://github.com/xczdenis/Auth_sprint_1)
+
 Исправление замечаний по ревью 1: [PR #1](https://github.com/xczdenis/Auth_sprint_1/pull/1)
 
 
