@@ -2,37 +2,55 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
-from dotenv import load_dotenv
+from pydantic import BaseModel, BaseSettings, Field
 
 BASE_DIR = Path(__file__).resolve().parent
 ROOT_DIR = Path(__file__).resolve().parent.parent
 
-env = os.getenv("ENVIRONMENT", "development")
 
-load_dotenv(dotenv_path=os.path.join(ROOT_DIR, ".env"))
-load_dotenv(dotenv_path=os.path.join(ROOT_DIR, ".envs", env, ".env"))
-
-
-def get_db_url():
-    db_url = os.getenv("DATABASE_URL", "")
+def get_db_url(config):
+    db_url = config.DATABASE_URL
     if not db_url:
         db_url = "postgresql://{usr}:{pwd}@{host}:{port}/{db}".format(
-            usr=os.getenv("POSTGRES_USER"),
-            pwd=os.getenv("POSTGRES_PASSWORD"),
-            host=os.getenv("POSTGRES_HOST"),
-            port=os.getenv("POSTGRES_PORT"),
-            db=os.getenv("POSTGRES_DB"),
+            usr=config.POSTGRES_USER,
+            pwd=config.POSTGRES_PASSWORD,
+            host=config.POSTGRES_HOST,
+            port=config.POSTGRES_PORT,
+            db=config.POSTGRES_DB,
         )
     return db_url
 
 
-class Config:
-    DEBUG = False
-    SECRET_KEY = os.getenv("SECRET_KEY", "")
+class Paginator(BaseModel):
+    page_size: int = 20
+    page_size_query_path: str = "page[size]"
+    page_number_query_path: str = "page[number]"
 
-    SQLALCHEMY_DATABASE_URI = get_db_url()
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    JWT_SECRET_KEY = os.getenv("SECRET_KEY", "")
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
-    JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
+class Settings(BaseSettings):
+    SECRET_KEY: str
+    JWT_SECRET_KEY: str = Field(env="SECRET_KEY")
+    JWT_ACCESS_TOKEN_EXPIRES: timedelta = timedelta(hours=1)
+    JWT_REFRESH_TOKEN_EXPIRES: timedelta = timedelta(days=30)
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_HOST: str
+    POSTGRES_PORT: int
+    POSTGRES_DB: str
+    DATABASE_URL: str = ""
+    SQLALCHEMY_DATABASE_URI: str = ""
+    SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
+    APP_HOST: str
+    APP_PORT: int
+    REDIS_HOST: str
+    REDIS_PORT: int
+    PAGINATOR: Paginator = Paginator()
+
+    class Config:
+        env = os.getenv("ENVIRONMENT", "development")
+        env_file = os.path.join(ROOT_DIR, ".envs", env, ".env"), os.path.join(ROOT_DIR, ".env")
+        env_file_encoding = "utf-8"
+
+
+settings = Settings()
+settings.SQLALCHEMY_DATABASE_URI = get_db_url(settings)

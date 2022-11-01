@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 import pytest
 from multidict import CIMultiDictProxy
@@ -10,11 +9,7 @@ from app import create_app
 @pytest.fixture(scope="session")
 def app():
     app = create_app()
-    app.config.update(
-        {
-            "TESTING": True,
-        }
-    )
+    app.config.update({"TESTING": True})
 
     with app.app_context():
         yield app
@@ -22,7 +17,18 @@ def app():
 
 @pytest.fixture(scope="session")
 def test_client(app):
-    return app.test_client()
+    class TestClient:
+        def __init__(self):
+            self.client = app.test_client()
+            self.base_url = "/api/v1"
+
+        def get(self, url, params: dict | None = None, headers: dict | None = None):
+            return self.client.get(self.base_url + url, query_string=params, headers=headers)
+
+        def post(self, url: str, json: dict | None = None, headers: dict | None = None):
+            return self.client.post(self.base_url + url, json=json, headers=headers)
+
+    return TestClient()
 
 
 @dataclass
@@ -35,16 +41,13 @@ class HTTPResponse:
 @pytest.fixture
 def make_request(test_client):
     def inner(
-        url: str, method: str, params: Optional[dict] = None, data: Optional[dict] = None
+        url: str, method: str, params: dict | None = None, data: dict | None = None
     ) -> HTTPResponse:
-        method_upper = method.upper()
-        if method_upper == "GET":
-            params = params or {}
-            with test_client.get(url, params=params) as response:
-                return HTTPResponse(
-                    body=response.json() if response.ok else {},
-                    headers=response.headers,
-                    status=response.status,
-                )
+        params = params or {}
+        data = data or {}
+        if method.upper() == "GET":
+            return test_client.get(url, query_string=params)
+        if method.upper() == "POST":
+            return test_client.post(url, json=data)
 
     return inner

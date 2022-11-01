@@ -32,8 +32,7 @@ def force_bytes(s, encoding="utf-8", strings_only=False, errors="strict"):
     if isinstance(s, bytes):
         if encoding == "utf-8":
             return s
-        else:
-            return s.decode("utf-8", errors).encode(encoding, errors)
+        return s.decode("utf-8", errors).encode(encoding, errors)
     if strings_only and is_protected_type(s):
         return s
     if isinstance(s, memoryview):

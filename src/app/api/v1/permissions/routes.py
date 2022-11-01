@@ -1,16 +1,18 @@
+from http import HTTPStatus
+
 from flasgger import swag_from
 from flask import jsonify, request
 from flask_jwt_extended import jwt_required
 
 from app import db
-from app.decorators import is_superuser_required
+from app.api.v1.permissions import bp
+from app.decorators import superuser_required
 from app.models import Permission
-from app.permissions import bp
 
 
 @bp.route("/", methods=["GET", "POST"])
 @jwt_required()
-@is_superuser_required()
+@superuser_required()
 @swag_from("docs/permissions_get.yml", methods=["GET"])
 @swag_from("docs/permissions_post.yml", methods=["POST"])
 def permissions():
@@ -19,7 +21,10 @@ def permissions():
         codename = request.json.get("codename")
 
         if not name or not codename:
-            return jsonify(msg="The 'name' or 'codename' parameters was not provided"), 400
+            return (
+                jsonify(msg="The 'name' or 'codename' parameters was not provided"),
+                HTTPStatus.BAD_REQUEST,
+            )
 
         if Permission.query.filter_by(codename=codename).first():
             return (
@@ -28,7 +33,7 @@ def permissions():
                         codename=codename
                     )
                 ),
-                409,
+                HTTPStatus.CONFLICT,
             )
 
         new_permission = Permission()
@@ -38,23 +43,21 @@ def permissions():
         db.session.add(new_permission)
         db.session.commit()
 
-        # TODO: как правильно возвращать - просто словарь или data=словарь
-        return jsonify(new_permission.to_dict()), 201
+        return jsonify(new_permission.to_dict()), HTTPStatus.CREATED
 
-    # TODO: как правильно возвращать - просто список или data=список
     return jsonify([item.to_dict() for item in Permission.query.all()])
 
 
 @bp.route("/<id>/", methods=["GET", "DELETE", "PATCH"])
 @jwt_required()
-@is_superuser_required()
+@superuser_required()
 @swag_from("docs/permission_detail_get.yml", methods=["GET"])
 @swag_from("docs/permission_detail_delete.yml", methods=["DELETE"])
 @swag_from("docs/permission_detail_patch.yml", methods=["PATCH"])
 def permission_detail(id):
     permission = Permission.query.filter_by(id=id).first()
     if not permission:
-        return jsonify(msg="Permission not found"), 404
+        return jsonify(msg="Permission not found"), HTTPStatus.NOT_FOUND
 
     if request.method == "DELETE":
         db.session.delete(permission)
@@ -66,7 +69,10 @@ def permission_detail(id):
         codename = request.json.get("codename")
 
         if not name and not codename:
-            return jsonify(msg="The 'name' or 'codename' parameters was not provided"), 400
+            return (
+                jsonify(msg="The 'name' or 'codename' parameters was not provided"),
+                HTTPStatus.BAD_REQUEST,
+            )
 
         if codename:
             if (
@@ -80,7 +86,7 @@ def permission_detail(id):
                             codename=codename
                         )
                     ),
-                    409,
+                    HTTPStatus.CONFLICT,
                 )
             permission.codename = codename
         if name:
