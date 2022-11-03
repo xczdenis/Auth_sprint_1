@@ -19,6 +19,10 @@ redis = "^4.3.4"
 flasgger = "^0.9.5"
 gevent = "^22.10.1"
 pydantic = "^1.10.2"
+opentelemetry-api = "^1.13.0"
+opentelemetry-sdk = "^1.13.0"
+opentelemetry-instrumentation-flask = "^0.34b0"
+opentelemetry-exporter-jaeger = "^1.13.0"
 
 
 [tool.poetry.group.lint.dependencies]
@@ -42,6 +46,17 @@ multidict = "^6.0.2"
 
 [tool.black]
 line-length = 100
+
+
+[tool.isort]
+line_length = 88
+multi_line_output = 3
+default_section = "THIRDPARTY"
+skip = "venv/"
+skip_glob = "**/migrations/*.py"
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
 
 
 [tool.pytest.ini_options]

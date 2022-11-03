@@ -13,6 +13,7 @@ services:
             - COMPOSE_MODE=on
             - POSTGRES_HOST=postgres
             - REDIS_HOST=redis
+            - JAEGER_HOST=jaeger
             - CREATE_SUPER_USER=True
         depends_on:
             - postgres
@@ -45,3 +46,8 @@ services:
             - ./src/nginx/templates:/etc/nginx/templates:ro
         depends_on:
             - app
+    jaeger:
+        build:
+            context: .
+            dockerfile: ./docker/jaeger/Dockerfile
+        restart: on-failure
