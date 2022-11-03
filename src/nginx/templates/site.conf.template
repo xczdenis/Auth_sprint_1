@@ -2,6 +2,7 @@ server {
     listen       ${APP_LISTEN_PORT} default_server;
     listen       [::]:${APP_LISTEN_PORT} default_server;
     server_name  _;
+    access_log  /var/log/nginx/access.log main;
 
     root /;
 

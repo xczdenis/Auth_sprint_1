@@ -28,6 +28,7 @@ class Paginator(BaseModel):
 
 
 class Settings(BaseSettings):
+    PROJECT_NAME: str = "movies_auth"
     SECRET_KEY: str
     JWT_SECRET_KEY: str = Field(env="SECRET_KEY")
     JWT_ACCESS_TOKEN_EXPIRES: timedelta = timedelta(hours=1)
@@ -44,6 +45,8 @@ class Settings(BaseSettings):
     APP_PORT: int
     REDIS_HOST: str
     REDIS_PORT: int
+    JAEGER_HOST: str
+    JAEGER_UDP_PORT: int
     PAGINATOR: Paginator = Paginator()
 
     class Config:

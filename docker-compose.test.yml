@@ -11,7 +11,6 @@ services:
             - APP_HOST=app
             - REDIS_HOST=redis
             - POSTGRES_HOST=postgres
+            - JAEGER_HOST=jaeger
         depends_on:
-            - postgres
-            - redis
             - app
