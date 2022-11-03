@@ -7,7 +7,8 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 from app import db
 from app.api.v1.users import bp
 from app.decorators import paginate, superuser_required
-from app.models import Permission, User
+from app.models import EntryRecord, Permission, User
+from app.pagination import get_pagination_params
 
 
 @bp.route("/", methods=["GET"])
@@ -15,7 +16,8 @@ from app.models import Permission, User
 @superuser_required()
 @paginate()
 def users():
-    return [item.to_dict() for item in User.query.all()]
+    page_number, page_size = get_pagination_params(request)
+    return User.query.paginate(page=page_number, per_page=page_size)
 
 
 @bp.route("/access_log/")
@@ -23,12 +25,17 @@ def users():
 @swag_from("docs/access_log.yml")
 @paginate()
 def access_log():
-    user_entry_records = []
     identity = get_jwt_identity()
     user = User.query.filter_by(id=identity).first()
-    if user:
-        user_entry_records = user.entry_records
-    return [item.to_dict() for item in user_entry_records]
+    if not user:
+        return jsonify(msg="Token is incorrect"), HTTPStatus.UNAUTHORIZED
+
+    page_number, page_size = get_pagination_params(request)
+    return (
+        EntryRecord.query.join(EntryRecord.user)
+        .filter(User.id == identity)
+        .paginate(page=page_number, per_page=page_size)
+    )
 
 
 @bp.route("/change_password/", methods=["POST"])

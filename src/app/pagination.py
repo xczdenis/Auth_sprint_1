@@ -13,6 +13,9 @@ class PaginatedPage(BaseModel):
     prev_page: int | None
     results: list
 
+    def serialize_results(self):
+        self.results = [item.to_dict() for item in self.results]
+
 
 def paginate_list(
     page_size: int, page_number: int, results: list, total_count: int | None = None
@@ -43,8 +46,7 @@ def paginate_list(
 
 
 def get_pagination_params(request: Request, page_size: int | None = None) -> tuple[int, int]:
-    page_size = request.args.get(
-        settings.PAGINATOR.page_size_query_path, page_size or settings.PAGINATOR.page_size
-    )
-    page_number = request.args.get(settings.PAGINATOR.page_number_query_path, 1)
-    return page_size, page_number
+    default_pagesize = page_size or settings.PAGINATOR.page_size
+    page_size = request.args.get(settings.PAGINATOR.page_size_query_path) or default_pagesize
+    page_number = request.args.get(settings.PAGINATOR.page_number_query_path) or 1
+    return int(page_number), int(page_size)

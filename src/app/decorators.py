@@ -4,11 +4,12 @@ from typing import Any
 
 from flask import current_app, jsonify, request
 from flask_jwt_extended import get_jwt
+from flask_sqlalchemy.pagination import Pagination
 from opentelemetry import trace as telemetry_trace
 from opentelemetry.trace import Tracer
 
 from app.module_loading import import_string
-from app.pagination import get_pagination_params, paginate_list
+from app.pagination import PaginatedPage, get_pagination_params, paginate_list
 
 
 def superuser_required(request_methods: list[str] | None = None) -> Any:
@@ -32,14 +33,26 @@ def paginate(page_size: int | None = None) -> Any:
         @wraps(fn)
         def decorator(*args, **kwargs):
             fn_result = current_app.ensure_sync(fn)(*args, **kwargs)
+            if isinstance(fn_result, Pagination):
+                paginated_page = PaginatedPage(
+                    total_count=fn_result.total,
+                    total_pages=fn_result.pages,
+                    next_page=fn_result.next_num,
+                    prev_page=fn_result.prev_num,
+                    results=fn_result.items,
+                )
+                paginated_page.serialize_results()
+                return jsonify(paginated_page.dict())
+
             if isinstance(fn_result, list):
-                _page_size, _page_number = get_pagination_params(request, page_size=page_size)
+                _page_number, _page_size = get_pagination_params(request, page_size=page_size)
                 paginated_page = paginate_list(
                     page_size=int(_page_size),
                     page_number=int(_page_number),
                     results=fn_result,
                 )
                 return jsonify(paginated_page.dict())
+
             return fn_result
 
         return decorator
