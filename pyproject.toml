@@ -44,6 +44,13 @@ pytest = "^7.2.0"
 Faker = "^15.1.1"
 multidict = "^6.0.2"
 
+
+[tool.poetry.group.docs.dependencies]
+mkdocs = "^1.4.2"
+mkdocs-material = "^8.5.8"
+pymdown-extensions = "^9.7"
+mkdocs-glightbox = "^0.3.0"
+
 [tool.black]
 line-length = 100
 

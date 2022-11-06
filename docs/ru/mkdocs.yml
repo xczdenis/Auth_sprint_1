@@ -1,0 +1,62 @@
+site_name: Auth-movies
+site_url: https://example.com/
+nav:
+    -   Home: index.md
+    -   Запуск проекта:
+            - launching/envs.md
+            - launching/docker.md
+            - launching/launch.md
+            - launching/tests.md
+            - launching/local.md
+    -   Режим разработки:
+            - development-env/init.md
+            - development-env/pre-commit-hooks.md
+    -   Особенности разработки:
+            - development/intro.md
+            - development/migrations.md
+            - development/requirements.md
+            - development/style-guides.md
+            - development/conventional-commits.md
+            - development/ide.md
+            - development/lint.md
+    -   Flow работы с репозиторием: git/git-flow.md
+theme:
+    name: material
+    features:
+        - header.autohide
+        - search.suggest
+        - search.highlight
+        - content.tabs.link
+    palette:
+        -   media: '(prefers-color-scheme: dark)'
+            scheme: slate
+            primary: teal
+            accent: amber
+            toggle:
+                icon: material/weather-night
+                name: Switch to light mode
+        -   media: '(prefers-color-scheme: light)'
+            scheme: default
+            toggle:
+                icon: material/weather-sunny
+                name: Switch to dark mode
+plugins:
+    - glightbox
+repo_name: xczdenis/Auth-movies
+repo_url: https://github.com/xczdenis/Auth_sprint_1
+markdown_extensions:
+    - admonition
+    - pymdownx.details
+    -   pymdownx.highlight:
+            anchor_linenums: false
+            auto_title: false
+            linenums: false
+    -   pymdownx.tabbed:
+            alternate_style: true
+    - pymdownx.superfences
+extra_css:
+    - css/termynal.css
+    - css/custom.css
+extra_javascript:
+    - js/termynal.js
+    - js/custom.js
