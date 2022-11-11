@@ -3,14 +3,10 @@ services:
         restart: "no"
     postgres:
         restart: "no"
-        volumes:
-            - pgdata_test:/var/lib/postgresql/data
         ports:
             - ${POSTGRES_PORT}:5432
     redis:
         restart: "no"
-        volumes:
-            - redis_test:/data
         ports:
             - ${REDIS_PORT}:6379
     nginx:
@@ -19,11 +15,11 @@ services:
             - APP_LISTEN_PORT=${APP_PORT}
         ports:
             - ${APP_PORT}:${APP_PORT}
+    jaeger:
+        restart: "no"
+        ports:
+            - ${JAEGER_TCP_PORT}:16686
     tests_app:
         restart: "no"
         volumes:
             - ./src:/src
-
-volumes:
-    pgdata_test:
-    redis_test:

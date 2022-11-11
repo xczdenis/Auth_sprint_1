@@ -1,13 +1,17 @@
 site_name: Auth-movies
-site_url: https://example.com/
+site_url: https://xczdenis.github.io/Auth_sprint_1/
 nav:
     -   Home: index.md
     -   Запуск проекта:
             - launching/envs.md
             - launching/docker.md
             - launching/launch.md
-            - launching/tests.md
             - launching/local.md
+    -   Запуск тестов: launching/tests.md
+    -   OAuth2:
+            - oauth2/intro.md
+            - oauth2/clients.md
+            - oauth2/developers.md
     -   Режим разработки:
             - development-env/init.md
             - development-env/pre-commit-hooks.md
@@ -45,15 +49,23 @@ plugins:
 repo_name: xczdenis/Auth-movies
 repo_url: https://github.com/xczdenis/Auth_sprint_1
 markdown_extensions:
+    - tables
     - admonition
     - pymdownx.details
+    -   pymdownx.emoji:
+            emoji_index: !!python/name:materialx.emoji.twemoji
+            emoji_generator: !!python/name:materialx.emoji.to_svg
     -   pymdownx.highlight:
             anchor_linenums: false
             auto_title: false
             linenums: false
     -   pymdownx.tabbed:
             alternate_style: true
-    - pymdownx.superfences
+    -   pymdownx.superfences:
+            custom_fences:
+                -   name: mermaid
+                    class: mermaid
+                    format: !!python/name:pymdownx.superfences.fence_code_format
 extra_css:
     - css/termynal.css
     - css/custom.css

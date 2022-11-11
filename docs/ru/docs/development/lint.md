@@ -6,6 +6,6 @@
 
 Если ты используешь PyCharm, то можешь настроить форматирование файла с помощью black
 через External Tools:
-![add-external-tool.png](/img/PyCharm/add-external-tool.png)
+![add-external-tool.png](../img/PyCharm/add-external-tool.png)
 Также можно повесить на это действие hot key:
-![add-hot-key.png](/img/PyCharm/add-hot-key.png)
+![add-hot-key.png](../img/PyCharm/add-hot-key.png)

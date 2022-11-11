@@ -22,8 +22,8 @@ def users():
 
 @bp.route("/access_log/")
 @jwt_required()
-@swag_from("docs/access_log.yml")
 @paginate()
+@swag_from("docs/access_log.yml")
 def access_log():
     identity = get_jwt_identity()
     user = User.query.filter_by(id=identity).first()
