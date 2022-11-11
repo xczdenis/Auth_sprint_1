@@ -53,6 +53,7 @@ class Settings(BaseSettings):
     MAIL_CLIENT_SECRET: str
     GOOGLE_CLIENT_ID: str
     GOOGLE_CLIENT_SECRET: str
+    RPS_LIMIT: int
     PAGINATOR: Paginator = Paginator()
 
     class Config:

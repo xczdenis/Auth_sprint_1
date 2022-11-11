@@ -24,6 +24,7 @@ opentelemetry-sdk = "^1.13.0"
 opentelemetry-instrumentation-flask = "^0.34b0"
 opentelemetry-exporter-jaeger = "^1.13.0"
 Authlib = "^1.1.0"
+Flask-Limiter = {extras = ["redis"], version = "^2.7.0"}
 
 
 [tool.poetry.group.lint.dependencies]
