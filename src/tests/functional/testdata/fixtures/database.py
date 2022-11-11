@@ -13,16 +13,20 @@ def fake_db(app):
     users = generate_users(50)
     permissions = generate_permissions()
 
+    def clean_data():
+        db.session.query(User).filter(User.id.in_([_.id for _ in users])).delete()
+        db.session.query(Permission).filter(Permission.id.in_([_.id for _ in permissions])).delete()
+        db.session.commit()
+
+    clean_data()
+
     db.session.bulk_save_objects(users)
     db.session.bulk_save_objects(permissions)
     db.session.commit()
 
     yield db
 
-    db.session.query(User).filter(User.id.in_([_.id for _ in users])).delete()
-    db.session.query(Permission).filter(Permission.id.in_([_.id for _ in permissions])).delete()
-
-    db.session.commit()
+    clean_data()
 
 
 @pytest.fixture(scope="session")

@@ -1,0 +1,33 @@
+Авторизация пользователя социальной сети.
+После того как пользователь подтвердит предоставление учетных данных на странице провайдера OAuth2,
+на ваш URL (client_redirect_uri) будет отправлен GET запрос с параметрами `provider`, `state`, `code`.
+Вам нужно отправить POST запрос на этот маршрут, передав в параметрах все параметры из полученного GET запроса.
+В ответ будет возвращены `access_token` и `refresh_token`.
+---
+tags:
+    - OAuth2
+parameters:
+    -   name: provider
+        in: fromData
+        required: true
+        type: string
+    -   name: code
+        in: fromData
+        required: true
+        type: string
+    -   name: state
+        in: fromData
+        required: true
+        type: string
+responses:
+    201:
+        description: Пользователь успешно авторизован
+        schema:
+            type: object
+            properties:
+                access_token:
+                    type: string
+                    description: Access token
+                refresh_token:
+                    type: string
+                    description: Refresh token

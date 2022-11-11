@@ -1,4 +1,20 @@
 services:
+    postgres:
+        volumes:
+            - pgdata_test:/var/lib/postgresql/data
+    redis:
+        volumes:
+            - redis_test:/data
+    jaeger:
+        ports:
+            - 6831:6831/udp
+        environment:
+            - SPAN_STORAGE_TYPE=badger
+            - BADGER_EPHEMERAL=false
+            - BADGER_DIRECTORY_VALUE=/badger/data
+            - BADGER_DIRECTORY_KEY=/badger/key
+        volumes:
+            - jaeger_test:/badger
     tests_app:
         build:
             context: .
@@ -14,3 +30,7 @@ services:
             - JAEGER_HOST=jaeger
         depends_on:
             - app
+volumes:
+    pgdata_test:
+    redis_test:
+    jaeger_test:

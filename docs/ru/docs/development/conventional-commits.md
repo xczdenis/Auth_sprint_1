@@ -11,4 +11,4 @@ commitizen check.........................................................Failed
 ```
 Для более удобного написания комментариев к коммитам, ты можешь воспользоваться плагином
 Conventional Commit для PyCharm:
-![conventional-commit-plugin](/img/PyCharm/conventional-commit-plugin.png)
+![conventional-commit-plugin](../img/PyCharm/conventional-commit-plugin.png)

@@ -47,6 +47,12 @@ class Settings(BaseSettings):
     REDIS_PORT: int
     JAEGER_HOST: str
     JAEGER_UDP_PORT: int
+    YANDEX_CLIENT_ID: str
+    YANDEX_CLIENT_SECRET: str
+    MAIL_CLIENT_ID: str
+    MAIL_CLIENT_SECRET: str
+    GOOGLE_CLIENT_ID: str
+    GOOGLE_CLIENT_SECRET: str
     PAGINATOR: Paginator = Paginator()
 
     class Config:

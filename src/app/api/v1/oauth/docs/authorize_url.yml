@@ -1,0 +1,34 @@
+Получение авторизационного URL провайдера.
+Возвращается URL провайдера, на который необходимо перенаправить пользователя.
+---
+tags:
+    - OAuth2
+parameters:
+    -   name: body
+        in: body
+        required: true
+        schema:
+            required:
+                - provider
+                - client_redirect_uri
+            properties:
+                provider:
+                    type: string
+                    description: Провайдер OAuth2 [yandex, mail, google]
+                client_redirect_uri:
+                    type: string
+                    description: Адрес вашего сайта, на который необходимо выполнить редирект,
+                        после того как пользователь авторизуется на URL провайдера
+responses:
+    200:
+        description: URL для авторизации успешно сформирован
+        schema:
+            type: object
+            properties:
+                state:
+                    type: string
+                    description: Уникальное строковое значение
+                url:
+                    type: string
+                    description: URL для авторизации
+                    format: uri

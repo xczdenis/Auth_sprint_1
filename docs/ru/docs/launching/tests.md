@@ -4,7 +4,7 @@
 запустить тесты, изменить код теста и перезапустить контейнер с тестами с помощью PyCharm
 (кнопка Start справа вверху) - это не затронет твой терминал и не нужно будет
 выполнять лишние команды:
-![test-container-in-pycharm](/img/PyCharm/test-container-in-pycharm.png)
+![test-container-in-pycharm](../img/PyCharm/test-container-in-pycharm.png)
 
 ## Запустить тесты в режиме демона
 === "Make"
@@ -159,3 +159,24 @@ $ docker-compose -f docker-compose.yml -f docker-compose.test.yml run tests_app
     ```
 
     </div>
+
+## Запустить тесты локально
+!!!warning
+    Для локального запуска тестов необходимо, чтобы были запущены:
+
+    * База данных (сервис `postgres`);
+    * Редис (сервис `redis`);
+    * Егерь (сервис `jaeger`).
+Из корневой директории проекта выполни команду:
+<div class="termy">
+
+```console
+$ pytest src
+
+... test_empty_data <span style="color: green;">PASSED</span>      <span style="color: green;">[  5%]</span>
+... test_wrong_data <span style="color: green;">PASSED</span>      <span style="color: green;">[ 11%]</span>
+...
+... test_new_user <span style="color: green;">PASSED</span>        <span style="color: green;">[100%]</span>
+```
+
+</div>

@@ -4,16 +4,15 @@ from flasgger import swag_from
 from flask import current_app, jsonify, request
 from flask_jwt_extended import (
     create_access_token,
-    create_refresh_token,
-    get_jti,
     get_jwt,
     get_jwt_identity,
     jwt_required,
 )
 
-from app import db, jwt_redis_blocklist
+from app import db, redis_db
 from app.api.v1.auth import bp
 from app.models import User
+from app.utils import obtain_auth_tokens
 
 
 @bp.route("/signup/", methods=["POST"])
@@ -52,19 +51,10 @@ def signin():
     if not user or not user.check_password(raw_password=password):
         return jsonify(msg="Login or password is incorrect"), HTTPStatus.UNAUTHORIZED
 
-    identity = user.id
-
-    additional_claims = {
-        "is_superuser": user.is_superuser,
-    }
-    refresh_token = create_refresh_token(identity=identity, additional_claims=additional_claims)
-
-    additional_claims["refresh_token_jti"] = get_jti(refresh_token)
-    access_token = create_access_token(identity=identity, additional_claims=additional_claims)
-
+    tokens = obtain_auth_tokens(user.id, user.is_superuser)
     user.log_entry(**request.headers)
 
-    return jsonify(access_token=access_token, refresh_token=refresh_token), HTTPStatus.CREATED
+    return jsonify(**tokens), HTTPStatus.CREATED
 
 
 @bp.route("/refresh/", methods=["POST"])
@@ -94,10 +84,8 @@ def logout():
     claims = get_jwt()
     jti = claims.get("jti")
     refresh_token_jti = claims.get("refresh_token_jti")
-    jwt_redis_blocklist.set(jti, "", ex=current_app.config.get("JWT_ACCESS_TOKEN_EXPIRES"))
-    jwt_redis_blocklist.set(
-        refresh_token_jti, "", ex=current_app.config.get("JWT_REFRESH_TOKEN_EXPIRES")
-    )
+    redis_db.set(jti, "", ex=current_app.config.get("JWT_ACCESS_TOKEN_EXPIRES"))
+    redis_db.set(refresh_token_jti, "", ex=current_app.config.get("JWT_REFRESH_TOKEN_EXPIRES"))
 
     user.remove_entry(**request.headers)
 
