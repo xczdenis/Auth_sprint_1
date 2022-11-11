@@ -15,11 +15,9 @@ from app.pagination import get_pagination_params
 @jwt_required()
 @superuser_required()
 @paginate()
-# @limiter.limit("6/minute")
 def users():
     page_number, page_size = get_pagination_params(request)
     return User.query.paginate(page=page_number, per_page=page_size)
-    # return 'hello'
 
 
 @bp.route("/access_log/")
