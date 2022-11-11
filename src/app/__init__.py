@@ -2,6 +2,8 @@ import redis
 from flasgger import Swagger
 from flask import Flask
 from flask_jwt_extended import JWTManager
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
@@ -31,6 +33,13 @@ yandex_oauth = YandexOAuthProvider()
 mail_oauth = MailOAuthProvider()
 google_oauth = GoogleOAuthProvider()
 
+limiter = Limiter(
+    key_func=get_remote_address,
+    storage_uri=f"redis://{settings.REDIS_HOST}:{settings.REDIS_PORT}",
+    strategy="fixed-window",
+    default_limits=[f"{settings.RPS_LIMIT} per second"],
+)
+
 
 @jwt.token_in_blocklist_loader
 def check_if_token_is_revoked(jwt_header, jwt_payload: dict):
@@ -57,6 +66,8 @@ def create_app():
 
     swagger.init_app(app)
     swagger.template = swagger_template
+
+    limiter.init_app(app)
 
     from app.api import bp as api_bp
 
