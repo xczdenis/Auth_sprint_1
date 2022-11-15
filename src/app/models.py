@@ -1,7 +1,9 @@
+import enum
 import uuid
 from datetime import datetime
 
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.orm import declared_attr
 
 from app import db
 from app.decorators import trace
@@ -25,7 +27,7 @@ class User(db.Model):
     email = db.Column(db.String, unique=True)
     password = db.Column(db.String, nullable=False)
     is_superuser = db.Column(db.Boolean, default=False)
-    entry_records = db.relationship("EntryRecord", back_populates="user", cascade="all,delete")
+    # login_history = db.relationship("EntryRecord", back_populates="user", cascade="all,delete")
     social_accounts = db.relationship("SocialAccount", back_populates="user", cascade="all,delete")
     permissions = db.relationship(
         "Permission",
@@ -45,8 +47,9 @@ class User(db.Model):
 
     def log_entry(self, **kwargs):
         log = EntryRecord()
-        log.user = self
+        log.user_id = self.id
         log.user_agent = kwargs.get("User-Agent")
+        log.device_type = DeviceType.OTHER
         db.session.add(log)
         db.session.commit()
 
@@ -87,19 +90,61 @@ class User(db.Model):
         }
 
 
-class EntryRecord(db.Model):
-    __tablename__ = "entry_records"
+class DeviceType(enum.Enum):
+    NOTEBOOK = "notebook"
+    DESKTOP = "desktop"
+    TABLET = "tablet"
+    PHONE = "phone"
+    TV = "tv"
+    OTHER = "other"
 
-    id = db.Column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False
-    )
+
+class EntryRecordMixin:
+    __table_args__ = (db.UniqueConstraint("id", "device_type"),)
+
+    @declared_attr
+    def user_id(self):
+        return db.Column(UUID(as_uuid=True), db.ForeignKey("users.id", ondelete="CASCADE"))
+
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False)
+    device_type = db.Column(db.Enum(DeviceType), primary_key=True)
     user_agent = db.Column(db.String)
     created = db.Column(db.DateTime, default=datetime.utcnow)
-    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey("users.id", ondelete="CASCADE"))
-    user = db.relationship("User", back_populates="entry_records")
 
     def to_dict(self):
         return {"user_agent": self.user_agent, "created": self.created}
+
+
+class EntryRecord(EntryRecordMixin, db.Model):
+    __tablename__ = "login_history"
+    __table_args__ = (
+        db.UniqueConstraint("id", "device_type"),
+        {"postgresql_partition_by": "LIST (device_type)"},
+    )
+
+
+class EntryRecordNotebook(EntryRecordMixin, db.Model):
+    __tablename__ = f"login_history_{DeviceType.NOTEBOOK.value}"
+
+
+class EntryRecordDesktop(EntryRecordMixin, db.Model):
+    __tablename__ = f"login_history_{DeviceType.DESKTOP.value}"
+
+
+class EntryRecordTablet(EntryRecordMixin, db.Model):
+    __tablename__ = f"login_history_{DeviceType.TABLET.value}"
+
+
+class EntryRecordPhone(EntryRecordMixin, db.Model):
+    __tablename__ = f"login_history_{DeviceType.PHONE.value}"
+
+
+class EntryRecordTv(EntryRecordMixin, db.Model):
+    __tablename__ = f"login_history_{DeviceType.TV.value}"
+
+
+class EntryRecordOther(EntryRecordMixin, db.Model):
+    __tablename__ = f"login_history_{DeviceType.OTHER.value}"
 
 
 class Permission(db.Model):
