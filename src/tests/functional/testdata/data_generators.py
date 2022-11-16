@@ -26,6 +26,10 @@ def generate_permissions():
     permissions = ["all", "sport", "series", "adult", "new_movies"]
     data = []
     for p in permissions:
+        n = 1
+        while Permission.query.filter_by(codename=p).first() is not None:
+            p = f"{p}-{n}"
+            n += 1
         permission = Permission()
         permission.id = fake_id()
         permission.name = p

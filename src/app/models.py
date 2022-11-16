@@ -8,6 +8,7 @@ from sqlalchemy.orm import declared_attr
 from app import db
 from app.decorators import trace
 from app.hashers import check_password, make_password
+from app.serializer import Field, Serializer
 
 users_permissions_association = db.Table(
     "users_permissions",
@@ -17,17 +18,17 @@ users_permissions_association = db.Table(
 )
 
 
-class User(db.Model):
+class User(Serializer, db.Model):
     __tablename__ = "users"
 
-    id = db.Column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False
-    )
+    class Meta:
+        serializable_fields = ("id", "login", "is_superuser", "permissions")
+
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False)
     login = db.Column(db.String, nullable=False)
     email = db.Column(db.String, unique=True)
     password = db.Column(db.String, nullable=False)
     is_superuser = db.Column(db.Boolean, default=False)
-    # login_history = db.relationship("EntryRecord", back_populates="user", cascade="all,delete")
     social_accounts = db.relationship("SocialAccount", back_populates="user", cascade="all,delete")
     permissions = db.relationship(
         "Permission",
@@ -55,7 +56,7 @@ class User(db.Model):
 
     def remove_entry(self, **kwargs):
         user_agent = kwargs.get("User-Agent")
-        EntryRecord.query.filter_by(user=self, user_agent=user_agent).delete()
+        EntryRecord.query.filter_by(user_id=self.id, user_agent=user_agent).delete()
         db.session.commit()
 
     @staticmethod
@@ -81,14 +82,6 @@ class User(db.Model):
 
         return user
 
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "login": self.login,
-            "is_superuser": self.is_superuser,
-            "permissions": [item.to_dict() for item in self.permissions],
-        }
-
 
 class DeviceType(enum.Enum):
     NOTEBOOK = "notebook"
@@ -99,8 +92,16 @@ class DeviceType(enum.Enum):
     OTHER = "other"
 
 
-class EntryRecordMixin:
-    __table_args__ = (db.UniqueConstraint("id", "device_type"),)
+class EntryRecordMixin(Serializer):
+    class Meta:
+        serializable_fields = (
+            "user_agent",
+            "created",
+            Field(name="device_type", fn="serialize_device_type"),
+        )
+
+    def serialize_device_type(self):
+        return self.device_type.name
 
     @declared_attr
     def user_id(self):
@@ -111,48 +112,43 @@ class EntryRecordMixin:
     user_agent = db.Column(db.String)
     created = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def to_dict(self):
-        return {"user_agent": self.user_agent, "created": self.created}
-
 
 class EntryRecord(EntryRecordMixin, db.Model):
-    __tablename__ = "login_history"
-    __table_args__ = (
-        db.UniqueConstraint("id", "device_type"),
-        {"postgresql_partition_by": "LIST (device_type)"},
-    )
+    __tablename__ = "entry_records"
+    __table_args__ = ({"postgresql_partition_by": "LIST (device_type)"},)
 
 
 class EntryRecordNotebook(EntryRecordMixin, db.Model):
-    __tablename__ = f"login_history_{DeviceType.NOTEBOOK.value}"
+    __tablename__ = f"entry_records_{DeviceType.NOTEBOOK.value}"
 
 
 class EntryRecordDesktop(EntryRecordMixin, db.Model):
-    __tablename__ = f"login_history_{DeviceType.DESKTOP.value}"
+    __tablename__ = f"entry_records_{DeviceType.DESKTOP.value}"
 
 
 class EntryRecordTablet(EntryRecordMixin, db.Model):
-    __tablename__ = f"login_history_{DeviceType.TABLET.value}"
+    __tablename__ = f"entry_records_{DeviceType.TABLET.value}"
 
 
 class EntryRecordPhone(EntryRecordMixin, db.Model):
-    __tablename__ = f"login_history_{DeviceType.PHONE.value}"
+    __tablename__ = f"entry_records_{DeviceType.PHONE.value}"
 
 
 class EntryRecordTv(EntryRecordMixin, db.Model):
-    __tablename__ = f"login_history_{DeviceType.TV.value}"
+    __tablename__ = f"entry_records_{DeviceType.TV.value}"
 
 
 class EntryRecordOther(EntryRecordMixin, db.Model):
-    __tablename__ = f"login_history_{DeviceType.OTHER.value}"
+    __tablename__ = f"entry_records_{DeviceType.OTHER.value}"
 
 
-class Permission(db.Model):
+class Permission(Serializer, db.Model):
     __tablename__ = "permissions"
 
-    id = db.Column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False
-    )
+    class Meta:
+        serializable_fields = "__all__"
+
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False)
     codename = db.Column(db.String(255), unique=True, nullable=False)
     name = db.Column(db.String(100), unique=True, nullable=False)
     users = db.relationship(
@@ -161,16 +157,14 @@ class Permission(db.Model):
         back_populates="permissions",
     )
 
-    def to_dict(self):
-        return {"id": self.id, "codename": self.codename, "name": self.name}
 
-
-class SocialAccount(db.Model):
+class SocialAccount(Serializer, db.Model):
     __tablename__ = "social_accounts"
 
-    id = db.Column(
-        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, unique=True, nullable=False
-    )
+    class Meta:
+        serializable_fields = ("id", "provider", "social_id", "email", "login", "created")
+
+    id = db.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, nullable=False)
     provider = db.Column(db.String, nullable=False)
     social_id = db.Column(db.String, nullable=False)
     email = db.Column(db.String, nullable=False)
@@ -211,13 +205,3 @@ class SocialAccount(db.Model):
             db.session.commit()
 
         return social_account
-
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "provider": self.provider,
-            "social_id": self.social_id,
-            "login": self.login,
-            "email": self.email,
-            "user": self.user.to_dict(),
-        }

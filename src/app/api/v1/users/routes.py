@@ -16,7 +16,7 @@ from app.pagination import get_pagination_params
 @superuser_required()
 @paginate()
 def users():
-    page_number, page_size = get_pagination_params(request)
+    page_number, page_size = get_pagination_params()
     return User.query.paginate(page=page_number, per_page=page_size)
 
 
@@ -30,9 +30,9 @@ def access_log():
     if not user:
         return jsonify(msg="Token is incorrect"), HTTPStatus.UNAUTHORIZED
 
-    page_number, page_size = get_pagination_params(request)
+    page_number, page_size = get_pagination_params()
     return (
-        EntryRecord.query.join(EntryRecord.user)
+        EntryRecord.query.join(User)
         .filter(User.id == identity)
         .paginate(page=page_number, per_page=page_size)
     )
@@ -88,16 +88,21 @@ def users_permissions():
             return jsonify(msg="The 'permissions' should be an array"), HTTPStatus.BAD_REQUEST
         for permission_id in set(v):
             if not isinstance(permission_id, str):
-                return jsonify(msg="The 'permission id' should be a string"), HTTPStatus.BAD_REQUEST
+                return (
+                    jsonify(msg="The 'permission codename' should be a string"),
+                    HTTPStatus.BAD_REQUEST,
+                )
 
-    for user_id, permissions_ids in users_permissions_data.items():
+    for user_id, permissions_codenames in users_permissions_data.items():
         user = User.query.filter_by(id=user_id).first()
         if not user:
             return jsonify(msg="User not found"), HTTPStatus.NOT_FOUND
 
         updated_user_permissions = user.permissions[:]
         permissions_from_request = (
-            db.session.query(Permission).filter(Permission.id.in_(permissions_ids)).all()
+            db.session.query(Permission)
+            .filter(Permission.codename.in_(permissions_codenames))
+            .all()
         )
         if request.method == "PUT":
             updated_user_permissions += permissions_from_request

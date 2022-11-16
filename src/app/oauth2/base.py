@@ -7,16 +7,13 @@ from authlib.integrations.flask_client import FlaskOAuth2App, OAuth
 from flask import request, session, url_for
 
 from app.decorators import trace
+from app.oauth2.utils import get_provider_from_request
 from app.utils import (
     abort_json,
     build_url,
     get_parameter_from_request,
     make_key_from_args,
 )
-
-
-def get_provider_from_request(**kwargs):
-    return get_parameter_from_request("provider", **kwargs)
 
 
 @dataclass

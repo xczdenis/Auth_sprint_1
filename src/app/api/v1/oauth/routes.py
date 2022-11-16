@@ -2,11 +2,14 @@ from http import HTTPStatus
 
 from flasgger import swag_from
 from flask import jsonify, redirect, request
+from flask_jwt_extended import jwt_required
 
 from app import oauth_manager
 from app.api.v1.oauth import bp
+from app.decorators import paginate, superuser_required
 from app.models import SocialAccount, User
-from app.oauth2 import get_provider_from_request
+from app.oauth2.utils import get_provider_from_request
+from app.pagination import get_pagination_params
 from app.utils import obtain_auth_tokens
 
 
@@ -39,3 +42,12 @@ def authorize():
         tokens = obtain_auth_tokens(user.id, user.is_superuser)
 
         return jsonify(**tokens), HTTPStatus.CREATED
+
+
+@bp.route("/social-accounts", methods=["GET"])
+@jwt_required()
+@superuser_required()
+@paginate()
+def users():
+    page_number, page_size = get_pagination_params()
+    return SocialAccount.query.paginate(page=page_number, per_page=page_size)

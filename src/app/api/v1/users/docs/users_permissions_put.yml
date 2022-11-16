@@ -2,7 +2,7 @@
 Запрос должен содержать заголовок Authorization=Bearer <access_token>.
 Выполняется добавление разрешений для пользователей.
 Тело запроса должно содержать параметр `users_permissions` - это словарь, ключами которого являются
-`id` пользователей, а значениями - массив `id` разрешений, которые должны быть добавлены пользователю.
+`id` пользователей, а значениями - массив `codename` разрешений, которые должны быть добавлены пользователю.
 ---
 tags:
     - Users
@@ -19,7 +19,7 @@ parameters:
                 <user_id>:
                     type: array
                     description: Array of permission's id
-                    example: ['permission_id_1', 'permission_id_2']
+                    example: ['permission_codename_1', 'permission_codename_2']
                     items:
                         type: string
 responses:
