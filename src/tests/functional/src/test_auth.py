@@ -115,22 +115,20 @@ class TestLogout:
 
     def test_correct_token(self, test_client, unique_saved_user):
         user, pwd = unique_saved_user
+
         response = test_client.post("/auth/signin/", json={"login": user.login, "password": pwd})
         data = response.json
-
         access_token = data.get("access_token")
 
         assert response.status_code == HTTPStatus.CREATED
 
         response = test_client.get(
-            "/users/access_log/",
-            headers={"Authorization": f"Bearer {access_token}"},
+            "/users/access_log/", headers={"Authorization": f"Bearer {access_token}"}
         )
         assert response.status_code == HTTPStatus.OK
 
         response = test_client.post(
-            "/auth/logout/",
-            headers={"Authorization": f"Bearer {access_token}"},
+            "/auth/logout/", headers={"Authorization": f"Bearer {access_token}"}
         )
         assert response.status_code == HTTPStatus.OK
 

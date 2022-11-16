@@ -167,7 +167,13 @@ $ docker-compose -f docker-compose.yml -f docker-compose.test.yml run tests_app
     * База данных (сервис `postgres`);
     * Редис (сервис `redis`);
     * Егерь (сервис `jaeger`).
-Из корневой директории проекта выполни команду:
+Для корректного прохождения тестов, нужно чтобы были применены все миграции:
+```bash
+export FLASK_APP=manage.py
+cd src
+python -m flask db upgrade
+```
+Для запуска тестов, выполни следующую команду, из корневой директории проекта:
 <div class="termy">
 
 ```console

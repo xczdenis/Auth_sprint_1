@@ -5,7 +5,7 @@
 
 
 ## Intro
-Все, что необходимо для работы с OAuth2 находится в файле `src/app/oauth2`.
+Все, что необходимо для работы с OAuth2 находится в папке `src/app/oauth2`.
 
 ## Requirements
 Используется библиотека [authlib](https://github.com/lepture/authlib)
@@ -36,7 +36,7 @@ class Settings(BaseSettings):
 
 Для примера рассмотрим адаптер `GoogleOAuthProvider`:
 ```python
-# src/app/oauth2.py
+# src/app/oauth2/base.py
 
 
 @dataclass
@@ -94,26 +94,40 @@ class BaseOAuthProvider:
 class MailOAuthProvider(BaseOAuthProvider):
     name: str = "mail"
     userinfo_endpoint: str = "userinfo"
-    authorize_url: str = "https://oauth.mail.ru/login"
+    authorize_url: s-tr = "https://oauth.mail.ru/login"
     access_token_url: str = "https://oauth.mail.ru/token"
     api_base_url: str = "https://oauth.mail.ru"
     client_kwargs: dict = field(default_factory=lambda: {"token_placement": "uri"})
 ```
 
 ## Регистрация провайдера
-Для того чтобы провайдер начал действовать, его нужно зарегистрировать в приложении. Это
-делается в файле src/app/__init__.py:
+Для того чтобы провайдер начал действовать, его нужно зарегистрировать в приложении.
+Сначала нужно создать экземпляр провайдера в файле `src/app/oauth2/__init__.py`:
 ```python
-from app.oauth2 import OAuthManager, GoogleOAuthProvider
+# src/app/oauth2/__init__.py
 
-oauth_manager = OAuthManager()
-google_oauth = GoogleOAuthProvider()
+from app.oauth2 import base
+
+oauth_manager = base.OAuthManager()
+
+yandex_oauth = base.YandexOAuthProvider()
+mail_oauth = base.MailOAuthProvider()
+google_oauth = base.GoogleOAuthProvider()
+```
+Затем, в функции `create_app()` нужно зарегистрировать нового провайдера:
+```python hl_lines="11-13"
+# src/app/__init__.py
+
+from app.oauth2 import oauth_manager, yandex_oauth, mail_oauth, google_oauth
+
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(settings)
 
     oauth_manager.init_app(app, cache=redis_db)
+    oauth_manager.register_provider(yandex_oauth)
+    oauth_manager.register_provider(mail_oauth)
     oauth_manager.register_provider(google_oauth)
 ```
 На этом добавление нового провайдера завершено.

@@ -1,6 +1,6 @@
 import math
 
-from flask import Request
+from flask import request
 from pydantic import BaseModel
 
 from config import settings
@@ -45,8 +45,8 @@ def paginate_list(
     )
 
 
-def get_pagination_params(request: Request, page_size: int | None = None) -> tuple[int, int]:
-    default_pagesize = page_size or settings.PAGINATOR.page_size
+def get_pagination_params(default_page_size: int | None = None) -> tuple[int, int]:
+    default_pagesize = default_page_size or settings.PAGINATOR.page_size
     page_size = request.args.get(settings.PAGINATOR.page_size_query_path) or default_pagesize
     page_number = request.args.get(settings.PAGINATOR.page_number_query_path) or 1
     return int(page_number), int(page_size)

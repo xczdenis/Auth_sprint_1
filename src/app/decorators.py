@@ -45,7 +45,7 @@ def paginate(page_size: int | None = None) -> Any:
                 return jsonify(paginated_page.dict())
 
             if isinstance(fn_result, list):
-                _page_number, _page_size = get_pagination_params(request, page_size=page_size)
+                _page_number, _page_size = get_pagination_params(page_size)
                 paginated_page = paginate_list(
                     page_size=int(_page_size),
                     page_number=int(_page_number),
