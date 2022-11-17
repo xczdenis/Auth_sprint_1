@@ -38,7 +38,7 @@
 
 
 ## Requirements
-* Python 3.10+
+* Python 3.11+
 * Docker 20.10.17+
 
 
