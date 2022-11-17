@@ -18,7 +18,6 @@ def obtain_auth_tokens(identity: str, is_superuser: bool = False) -> dict:
 
 
 def get_parameter_from_request(key: str, default: Any | None = None, silent: bool = False):
-    storage = {}
     if request.method == "GET":
         storage = request.args
     else:

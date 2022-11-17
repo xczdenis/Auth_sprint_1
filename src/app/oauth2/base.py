@@ -7,7 +7,8 @@ from authlib.integrations.flask_client import FlaskOAuth2App, OAuth
 from flask import request, session, url_for
 
 from app.decorators import trace
-from app.oauth2.utils import get_provider_from_request
+from app.oauth2.enums import OAuthProviders
+from app.oauth2.utils import get_provider_attr_from_settings, get_provider_from_request
 from app.utils import (
     abort_json,
     build_url,
@@ -27,9 +28,18 @@ class SocialAccount:
 @dataclass
 class BaseOAuthProvider:
     name: str
-    userinfo_endpoint: str
+    authorize_url: str = ""
+    access_token_url: str = ""
+    api_base_url: str = ""
+    userinfo_endpoint: str = ""
     client_kwargs: dict = field(default_factory=lambda: {})
     _client: FlaskOAuth2App | None = None
+
+    def __post_init__(self):
+        self.authorize_url = get_provider_attr_from_settings(self.name, "authorize_url")
+        self.access_token_url = get_provider_attr_from_settings(self.name, "access_token_url")
+        self.api_base_url = get_provider_attr_from_settings(self.name, "api_base_url")
+        self.userinfo_endpoint = get_provider_attr_from_settings(self.name, "userinfo_url")
 
     def get_metadata(self) -> dict:
         return asdict(self)
@@ -44,11 +54,7 @@ class BaseOAuthProvider:
 
 @dataclass
 class YandexOAuthProvider(BaseOAuthProvider):
-    name: str = "yandex"
-    userinfo_endpoint: str = "info"
-    authorize_url: str = "https://oauth.yandex.ru/authorize"
-    access_token_url: str = "https://oauth.yandex.ru/token"
-    api_base_url: str = "https://login.yandex.ru"
+    name: str = OAuthProviders.yandex
 
     def get_social_account(self) -> SocialAccount | None:
         user_info = self.get_user_info()
@@ -64,11 +70,7 @@ class YandexOAuthProvider(BaseOAuthProvider):
 
 @dataclass
 class MailOAuthProvider(BaseOAuthProvider):
-    name: str = "mail"
-    userinfo_endpoint: str = "userinfo"
-    authorize_url: str = "https://oauth.mail.ru/login"
-    access_token_url: str = "https://oauth.mail.ru/token"
-    api_base_url: str = "https://oauth.mail.ru"
+    name: str = OAuthProviders.mail
     client_kwargs: dict = field(default_factory=lambda: {"token_placement": "uri"})
 
     def get_social_account(self) -> SocialAccount | None:
@@ -85,11 +87,7 @@ class MailOAuthProvider(BaseOAuthProvider):
 
 @dataclass
 class GoogleOAuthProvider(BaseOAuthProvider):
-    name: str = "google"
-    userinfo_endpoint: str = "userinfo?alt=json"
-    authorize_url: str = "https://accounts.google.com/o/oauth2/v2/auth"
-    access_token_url: str = "https://oauth2.googleapis.com/token"
-    api_base_url: str = "https://www.googleapis.com/oauth2/v1/"
+    name: str = OAuthProviders.google
     client_kwargs: dict = field(
         default_factory=lambda: {
             "scope": "https://www.googleapis.com/auth/userinfo.email "
