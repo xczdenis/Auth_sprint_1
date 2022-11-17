@@ -7,6 +7,7 @@ from authlib.integrations.flask_client import FlaskOAuth2App, OAuth
 from flask import request, session, url_for
 
 from app.decorators import trace
+from app.oauth2.enums import OAuthProviders
 from app.oauth2.utils import get_provider_attr_from_settings, get_provider_from_request
 from app.utils import (
     abort_json,
@@ -14,13 +15,6 @@ from app.utils import (
     get_parameter_from_request,
     make_key_from_args,
 )
-
-
-@dataclass(slots=True, frozen=True)
-class OAuthProviders:
-    yandex = "yandex"
-    mail = "mail"
-    google = "google"
 
 
 @dataclass

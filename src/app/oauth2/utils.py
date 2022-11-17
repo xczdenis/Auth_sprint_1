@@ -1,6 +1,7 @@
 from loguru import logger
 
-from app.utils import get_parameter_from_request
+from app.oauth2.enums import OAuthProviders
+from app.utils import abort_json, get_parameter_from_request
 from config import settings
 
 
@@ -15,5 +16,8 @@ def get_provider_attr_from_settings(provider_env_prefix: str, attr_name: str):
     return value
 
 
-def get_provider_from_request(**kwargs):
-    return get_parameter_from_request("provider", **kwargs)
+def get_provider_from_request(silent: bool = False, **kwargs):
+    provider = get_parameter_from_request("provider", **kwargs)
+    if not silent and not OAuthProviders.is_valid(provider):
+        abort_json("No such provider '%s'" % provider)
+    return provider
