@@ -99,7 +99,17 @@ down: $(RUN_PROD_DOWN) $(RUN_DEV_DOWN) $(RUN_TEST_DOWN)
 	$(call log,Down containers $(COMPOSE_PROJECT_NAME))
 	docker-compose -f $(DOCKER_COMPOSE_MAIN_FILE) -f $(DOCKER_COMPOSE_PROD_FILE) down
 	docker-compose -f $(DOCKER_COMPOSE_MAIN_FILE) -f $(DOCKER_COMPOSE_DEV_FILE) down
-	#docker-compose -f $(DOCKER_COMPOSE_MAIN_FILE) -f $(DOCKER_COMPOSE_TEST_FILE) down
+	docker-compose -f $(DOCKER_COMPOSE_MAIN_FILE) -f $(DOCKER_COMPOSE_TEST_FILE) down
+
+
+remove:
+	@clear
+	@echo "${RED}----------------!!! DANGER !!!----------------"
+	@echo "Вы собираетесь удалить все неиспользуемые образы, контейнеры и тома."
+	@echo "Будут удалены все незапущенные контейнеры, все образы для незапущенных контейнеров и все тома для незапущенных контейнеров"
+	@read -p "${ORANGE}Вы точно уверены, что хотите продолжить? [yes/n]: ${RESET}" TAG \
+	&& if [ "_$${TAG}" != "_yes" ]; then echo aborting; exit 1 ; fi
+	docker system prune -a -f --volumes
 
 
 #############
