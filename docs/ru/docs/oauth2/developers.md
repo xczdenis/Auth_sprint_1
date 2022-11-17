@@ -11,23 +11,52 @@
 Используется библиотека [authlib](https://github.com/lepture/authlib)
 
 ## Конфиги провайдеров
-Каждый OAuth провайдер имеет свои `client_id` и `secret_id`. Эти настройки нужно добавить в
-переменные окружения в папке `.envs`. Например:
-```dotenv
-GOOGLE_CLIENT_ID=c1b2
-GOOGLE_CLIENT_SECRET=f030d
+Настройки OAuth провайдеров хранятся в файлах `.env` в папке `.envs`. Рассмотрим подробнее
+структуру настроек на примере одного из провайдеров:
 ```
-Затем необходимо добавить эти переменные в настройки приложения:
-```python hl_lines="8-9"
+YANDEX_CLIENT_ID=c95621
+YANDEX_CLIENT_SECRET=s389752f
+YANDEX_OAUTH__AUTHORIZE_URL=https://oauth.yandex.ru/authorize
+YANDEX_OAUTH__ACCESS_TOKEN_URL=https://oauth.yandex.ru/token
+YANDEX_OAUTH__API_BASE_URL=https://login.yandex.ru
+YANDEX_OAUTH__USERINFO_URL=info
+```
+Каждый OAuth провайдер имеет свои `client_id` и `secret`. Имя переменной окружения
+для этих параметров формируется по маске `EXAMPLE_CLIENT_ID`, `EXAMPLE_SECRET`,
+где `EXAMPLE` - это имя провайдера.
+
+!!!warning
+    Библиотека authlib будет использовать имя `EXAMPLE` как атрибут экземпляра класса провайдера
+
+Затем следует блок переменных с префиксом `EXAMPLE_OAUTH__` - эти настройки будут преобразованы
+в словарь в объекте `settings`:
+```python
+{
+    'yandex_oauth': {
+        'authorize_url': 'https://oauth.yandex.ru/authorize',
+        'access_token_url': 'https://oauth.yandex.ru/token',
+        'api_base_url': 'https://login.yandex.ru',
+        'userinfo_url': 'info'
+    }
+}
+```
+Для этого, провайдер должен быть добавлен в `settings` следующим образом:
+```python hl_lines="15"
 # src/config.py
+
+
+class BaseOAuthProvider(BaseModel):
+    authorize_url: str
+    access_token_url: str
+    api_base_url: str
+    userinfo_url: str
 
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "movies_auth"
     SECRET_KEY: str
     ...
-    GOOGLE_CLIENT_ID: str
-    GOOGLE_CLIENT_SECRET: str
+    YANDEX_OAUTH: BaseOAuthProvider
 ```
 
 ## Создание адаптера для провайдера
@@ -41,11 +70,7 @@ class Settings(BaseSettings):
 
 @dataclass
 class GoogleOAuthProvider(BaseOAuthProvider):
-    name: str = "google"
-    userinfo_endpoint: str = "userinfo?alt=json"
-    authorize_url: str = "https://accounts.google.com/o/oauth2/v2/auth"
-    access_token_url: str = "https://oauth2.googleapis.com/token"
-    api_base_url: str = "https://www.googleapis.com/oauth2/v1/"
+    name: str = OAuthProviders.google
     client_kwargs: dict = field(
         default_factory=lambda: {
             "scope": "https://www.googleapis.com/auth/userinfo.email "
@@ -64,14 +89,25 @@ class GoogleOAuthProvider(BaseOAuthProvider):
             )
         return None
 ```
-Для добавления нового провайдера нужно создать для него адаптер. На что следует обратить внимание:
+Для добавления нового провайдера нужно создать для него адаптер - наследник класса
+`BaseOAuthProvider`. Имя нового провайдера нужно указать в классе `OAuthProviders`:
+```python
+# src/app/oauth2/base.py
 
-Реквизит `name`: формируется из имени настроек `EXAMPLE_CLIENT_ID`. Для провайдера Google,
-настройка называется `GOOGLE_CLIENT_ID`, значит значение реквизита name должно быть `google`.
 
-Реквизит `userinfo_endpoint`: путь, по которому отправляется запрос на получение информации из
-аккаунта пользователя. Полный url запроса формируется как `api_base_url` + `userinfo_endpoint`.
-Получение данных пользователя выполняется в методе `get_user_info` базового класса
+@dataclass(slots=True, frozen=True)
+class OAuthProviders:
+    yandex = "yandex"
+    mail = "mail"
+    google = "google"
+```
+
+На что следует обратить внимание при создании адаптера:
+
+* **Имя провайдера**: оно формируется из имени настроек `EXAMPLE_CLIENT_ID`. Для провайдера Google,
+настройка называется `GOOGLE_CLIENT_ID`, значит имя должно быть `google`.
+
+* Получение данных пользователя выполняется в методе `get_user_info` базового класса
 `BaseOAuthProvider` (метод может быть переопределен в адаптере):
 ```python hl_lines="5-7"
 @dataclass
@@ -83,20 +119,16 @@ class BaseOAuthProvider:
         return r.json()
 ```
 
-Адаптер должен содержать метод `get_social_account`, который возвращает экземпляр класса
+* Адаптер должен содержать метод `get_social_account`, который возвращает экземпляр класса
 `SocialAccount`.
 
-Реквизит `client_kwargs` может содержать уникальные настройки, требуемые для провайдера. Например,
+* Реквизит `client_kwargs` может содержать уникальные настройки, требуемые для провайдера. Например,
 для google требуется указать `scope` (разрешения), а для mail требуется указать место расположения
 `access_token`:
-```python hl_lines="8"
+```python hl_lines="4"
 @dataclass
 class MailOAuthProvider(BaseOAuthProvider):
-    name: str = "mail"
-    userinfo_endpoint: str = "userinfo"
-    authorize_url: s-tr = "https://oauth.mail.ru/login"
-    access_token_url: str = "https://oauth.mail.ru/token"
-    api_base_url: str = "https://oauth.mail.ru"
+    name: str = OAuthProviders.mail
     client_kwargs: dict = field(default_factory=lambda: {"token_placement": "uri"})
 ```
 

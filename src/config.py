@@ -27,6 +27,13 @@ class Paginator(BaseModel):
     page_number_query_path: str = "page[number]"
 
 
+class BaseOAuthProvider(BaseModel):
+    authorize_url: str
+    access_token_url: str
+    api_base_url: str
+    userinfo_url: str
+
+
 class Settings(BaseSettings):
     PROJECT_NAME: str = "movies_auth"
     SECRET_KEY: str
@@ -55,11 +62,16 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_SECRET: str
     RPS_LIMIT: int
     PAGINATOR: Paginator = Paginator()
+    ENABLE_TRACER: bool = True
+    YANDEX_OAUTH: BaseOAuthProvider
+    MAIL_OAUTH: BaseOAuthProvider
+    GOOGLE_OAUTH: BaseOAuthProvider
 
     class Config:
         env = os.getenv("ENVIRONMENT", "development")
         env_file = os.path.join(ROOT_DIR, ".envs", env, ".env"), os.path.join(ROOT_DIR, ".env")
         env_file_encoding = "utf-8"
+        env_nested_delimiter = "__"
 
 
 settings = Settings()
