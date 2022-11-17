@@ -1,6 +1,6 @@
 ARG env=${ENVIRONMENT:-production}
 
-FROM python:3.10-slim as builder
+FROM python:3.11.0-slim as builder
 
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 

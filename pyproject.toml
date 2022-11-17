@@ -6,8 +6,7 @@ authors = ["Denis <xczdenis@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.10"
-psycopg2 = "^2.9.4"
+python = "^3.11"
 python-dotenv = "^0.21.0"
 gunicorn = "^20.1.0"
 loguru = "^0.6.0"
@@ -25,6 +24,7 @@ opentelemetry-instrumentation-flask = "^0.34b0"
 opentelemetry-exporter-jaeger = "^1.13.0"
 Authlib = "^1.1.0"
 Flask-Limiter = {extras = ["redis"], version = "^2.7.0"}
+psycopg2-binary = "^2.9.5"
 
 
 [tool.poetry.group.lint.dependencies]
@@ -44,7 +44,6 @@ pre-commit = "^2.20.0"
 [tool.poetry.group.tests.dependencies]
 pytest = "^7.2.0"
 Faker = "^15.1.1"
-multidict = "^6.0.2"
 
 
 [tool.poetry.group.docs.dependencies]

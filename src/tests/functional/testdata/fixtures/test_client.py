@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 
 import pytest
-from multidict import CIMultiDictProxy
 
 from app import create_app
 
@@ -34,20 +33,5 @@ def test_client(app):
 @dataclass
 class HTTPResponse:
     body: dict | list
-    headers: CIMultiDictProxy[str]
+    headers: dict
     status: int
-
-
-@pytest.fixture
-def make_request(test_client):
-    def inner(
-        url: str, method: str, params: dict | None = None, data: dict | None = None
-    ) -> HTTPResponse:
-        params = params or {}
-        data = data or {}
-        if method.upper() == "GET":
-            return test_client.get(url, query_string=params)
-        if method.upper() == "POST":
-            return test_client.post(url, json=data)
-
-    return inner
