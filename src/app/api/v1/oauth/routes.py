@@ -24,22 +24,24 @@ def authorize_url():
 def authorize():
     if request.method == "GET":
         return redirect(oauth_manager.generate_client_redirect_uri())
+    else:
+        provider_name = get_provider_from_request()
+        oauth_social_account = oauth_manager.get_social_account(provider_name=provider_name)
 
-    provider_name = get_provider_from_request()
-    oauth_social_account = oauth_manager.get_social_account(provider_name=provider_name)
+        user = User.get_or_create(
+            login=oauth_social_account.login, email=oauth_social_account.email
+        )
+        SocialAccount.get_or_create(
+            provider=provider_name,
+            social_id=oauth_social_account.id,
+            email=oauth_social_account.email,
+            login=oauth_social_account.login,
+            user=user,
+        )
 
-    user = User.get_or_create(login=oauth_social_account.login, email=oauth_social_account.email)
-    SocialAccount.get_or_create(
-        provider=provider_name,
-        social_id=oauth_social_account.id,
-        email=oauth_social_account.email,
-        login=oauth_social_account.login,
-        user=user,
-    )
+        tokens = obtain_auth_tokens(user.id, user.is_superuser)
 
-    tokens = obtain_auth_tokens(user.id, user.is_superuser)
-
-    return jsonify(**tokens), HTTPStatus.CREATED
+        return jsonify(**tokens), HTTPStatus.CREATED
 
 
 @bp.route("/social-accounts", methods=["GET"])

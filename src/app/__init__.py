@@ -23,8 +23,7 @@ def create_app():
 
     jwt.init_app(app)
 
-    if settings.ENABLE_TRACER:
-        jaeger.init_app(app)
+    jaeger.init_app(app)
 
     oauth_manager.init_app(app, cache=redis_db)
     oauth_manager.register_provider(yandex_oauth)
