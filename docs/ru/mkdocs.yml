@@ -1,5 +1,5 @@
 site_name: Auth-movies
-site_url: https://xczdenis.github.io/Auth_sprint_1/
+site_url: https://xczdenis.github.io/auth_movies/
 nav:
     -   Home: index.md
     -   Запуск проекта:
@@ -47,7 +47,7 @@ theme:
 plugins:
     - glightbox
 repo_name: xczdenis/Auth-movies
-repo_url: https://github.com/xczdenis/Auth_sprint_1
+repo_url: https://github.com/xczdenis/auth_movies
 markdown_extensions:
     - tables
     - admonition

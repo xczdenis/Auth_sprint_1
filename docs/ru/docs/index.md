@@ -5,9 +5,9 @@
 
 <hr>
 
-**Исходный код**: [https://github.com/xczdenis/Auth_sprint_1](https://github.com/xczdenis/Auth_sprint_1)
+**Исходный код**: [https://github.com/xczdenis/auth_movies](https://github.com/xczdenis/auth_movies)
 
-**Документация**: [https://xczdenis.github.io/Auth_sprint_1/](https://xczdenis.github.io/Auth_sprint_1/)
+**Документация**: [https://xczdenis.github.io/auth_movies/](https://xczdenis.github.io/auth_movies/)
 
 **Open API**: [http://127.0.0.1:5000/api/v1/swagger/](http://127.0.0.1:5000/api/v1/swagger/)
 <hr>
