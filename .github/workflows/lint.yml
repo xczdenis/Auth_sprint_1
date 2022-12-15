@@ -1,7 +1,7 @@
 name: Lint workflow
 
 on:
-    pull_request:
+    push:
 
 jobs:
     lint-flake8:
@@ -23,6 +23,7 @@ jobs:
                 run: poetry install --only lint
             -   name: Lint by flake8
                 run: poetry run flake8
+
     lint-black:
         name: Lint by black
         runs-on: ubuntu-latest
@@ -37,3 +38,19 @@ jobs:
                 with:
                     options: "--check"
                     src: "."
+    tg:
+        name: tg-notify
+        runs-on: ubuntu-latest
+        steps:
+            -   name: send telegram message on push
+                uses: appleboy/telegram-action@master
+                with:
+                    to: ${{ secrets.TELEGRAM_TO }}
+                    token: ${{ secrets.TELEGRAM_TOKEN }}
+                    message: |
+                        ${{ github.actor }} created commit:
+                        Commit message: ${{ github.event.commits[0].message }}
+
+                        Repository: ${{ github.repository }}
+
+                        See changes: https://github.com/${{ github.repository }}/commit/${{github.sha}}
