@@ -9,13 +9,14 @@
 ```bash
 echo $FLASK_APP
 ```
+
 Должен быть результат:
 ```
 manage.py
 ```
 Если переменная `FLASK_APP` не установлена, то установите её:
 ```bash
-export FLASK_APP=manage.py
+export FLASK_APP=main.py
 ```
 Сформировать файлы миграции:
 ```bash

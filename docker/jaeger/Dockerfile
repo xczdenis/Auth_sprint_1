@@ -1,1 +1,3 @@
-FROM jaegertracing/all-in-one as builder
+ARG img=jaegertracing/all-in-one:latest
+
+FROM ${img}

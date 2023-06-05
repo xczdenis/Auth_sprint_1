@@ -169,7 +169,7 @@ $ docker-compose -f docker-compose.yml -f docker-compose.test.yml run tests_app
     * Егерь (сервис `jaeger`).
 Для корректного прохождения тестов, нужно чтобы были применены все миграции:
 ```bash
-export FLASK_APP=manage.py
+export FLASK_APP=main.py
 cd src
 python -m flask db upgrade
 ```

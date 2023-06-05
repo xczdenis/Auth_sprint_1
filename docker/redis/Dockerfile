@@ -1,10 +1,5 @@
-ARG env=${ENVIRONMENT:-production}
+ARG img=redis:7-alpine
 
-FROM redis:7-alpine as builder
+FROM ${img}
 
-FROM builder as development
-EXPOSE 6379
-
-FROM builder as production
-
-FROM ${env}
+COPY ./scripts /scripts

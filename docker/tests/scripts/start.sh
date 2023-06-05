@@ -1,2 +1,5 @@
 #!/bin/sh
-pytest tests
+
+. ./.venv/bin/activate
+
+python -m pytest

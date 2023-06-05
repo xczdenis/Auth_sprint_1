@@ -36,5 +36,5 @@ python -m flask db upgrade
 ```
 Запусти приложение:
 ```bash
-python manage.py
+python main.py
 ```

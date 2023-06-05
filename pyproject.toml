@@ -4,60 +4,69 @@ version = "0.1.0"
 description = "Auth service for movies"
 authors = ["Denis <xczdenis@gmail.com>"]
 readme = "README.md"
+packages = [
+    {include = "movies_auth", from = "src"},
+]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-python-dotenv = "^0.21.0"
-gunicorn = "^20.1.0"
-loguru = "^0.6.0"
-Flask = "^2.2.2"
-flask-sqlalchemy = "^3.0.2"
-Flask-Migrate = "^3.1.0"
-Flask-JWT-Extended = "^4.4.4"
-redis = "^4.3.4"
+flask = "^2.3.2"
+flask-migrate = "^4.0.4"
+flask-sqlalchemy = "^3.0.3"
+flask-jwt-extended = "^4.5.2"
+flask-limiter = "^3.3.1"
+flask-pydantic = "^0.11.0"
+flask-marshmallow = "^0.15.0"
 flasgger = "^0.9.5"
+gunicorn = "^20.1.0"
+loguru = "^0.7.0"
+redis = "^4.3.4"
 gevent = "^22.10.1"
 pydantic = "^1.10.2"
-opentelemetry-api = "^1.13.0"
-opentelemetry-sdk = "^1.13.0"
-opentelemetry-instrumentation-flask = "^0.34b0"
-opentelemetry-exporter-jaeger = "^1.13.0"
 Authlib = "^1.1.0"
-Flask-Limiter = {extras = ["redis"], version = "^2.7.0"}
 psycopg2-binary = "^2.9.5"
+python-dotenv = "^1.0.0"
+orjson = "^3.8.14"
+marshmallow-sqlalchemy = "^0.29.0"
+requests = "^2.31.0"
+opentelemetry-api = "^1.18.0"
+opentelemetry-sdk = "^1.18.0"
+opentelemetry-instrumentation-flask = "^0.39b0"
+opentelemetry-exporter-jaeger = "^1.18.0"
 
 
 [tool.poetry.group.lint.dependencies]
-flake8 = "^5.0.4"
-flake8-broken-line = "^0.6.0"
+flake8 = "^6.0.0"
 flake8-quotes = "^3.3.1"
+flake8-comprehensions = "^3.12.0"
+flake8-bandit = "^4.1.1"
+flake8-black = "^0.3.6"
 pep8-naming = "^0.13.2"
 
 
 [tool.poetry.group.dev.dependencies]
-black = "^22.10.0"
 isort = "^5.10.1"
-pre-commit = "^2.20.0"
-
+pre-commit = "^3.3.2"
+autoflake = "^2.1.1"
 
 
 [tool.poetry.group.tests.dependencies]
 pytest = "^7.2.0"
-Faker = "^15.1.1"
+faker = "^18.9.0"
 
 
 [tool.poetry.group.docs.dependencies]
 mkdocs = "^1.4.2"
-mkdocs-material = "^8.5.8"
 pymdown-extensions = "^9.7"
 mkdocs-glightbox = "^0.3.0"
+mkdocs-material = "^9.1.14"
 
 [tool.black]
-line-length = 100
+line-length = 110
 
 
 [tool.isort]
-line_length = 88
+line_length = 110
 multi_line_output = 3
 default_section = "THIRDPARTY"
 skip = "venv/"
@@ -68,8 +77,8 @@ use_parentheses = true
 
 
 [tool.pytest.ini_options]
-pythonpath = ["src", "app"]
-addopts = "-v -p no:warnings"
+#addopts = ["-v", "-rP", "-p", "no:warnings", "--import-mode=importlib",]
+addopts = ["-v", "-p", "no:warnings", "--import-mode=importlib",]
 
 
 [build-system]

@@ -1,54 +1,117 @@
+x-base-service: &base-service
+    platform: ${DOCKER_IMG_PLATFORM:-linux/amd64}
+    restart: on-failure
+
+x-common-healthcheck: &common-healthcheck
+    interval: 3s
+    timeout: 2s
+    retries: 20
+
 services:
+    proxy:
+        <<: *base-service
+        build:
+            context: .
+            dockerfile: ./docker/movies_auth/nginx/Dockerfile
+            args:
+                - img=${NGINX_IMG}
+        environment:
+            APP_HOST: app
+            APP_PORT: 8000
+            APP_LISTEN_PORT: ${APP_LISTEN_PORT}
+        volumes:
+            - ./docker/movies_auth/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+            - ./docker/movies_auth/nginx/templates:/etc/nginx/templates:ro
+        ports:
+            - ${APP_LISTEN_PORT}:${APP_LISTEN_PORT}
+        depends_on:
+            app:
+                condition: service_healthy
+        profiles:
+            - default
+
     app:
         build:
             context: .
-            dockerfile: ./docker/app/Dockerfile
-        image: app-movies-auth-img
-        restart: on-failure
-        env_file:
-            - ./.envs/${ENVIRONMENT:-production}/.env
+            dockerfile: ./docker/movies_auth/Dockerfile
+            args:
+                - img=${PYTHON_IMG}
+                - env=${ENVIRONMENT}
+        env_file: .env
         environment:
-            - ENVIRONMENT=${ENVIRONMENT:-production}
-            - FLASK_APP=manage.py
-            - COMPOSE_MODE=on
-            - POSTGRES_HOST=postgres
-            - REDIS_HOST=redis
-            - JAEGER_HOST=jaeger
-            - CREATE_SUPER_USER=True
+            ENVIRONMENT: ${ENVIRONMENT:-production}
+            FLASK_APP: src/movies_auth/main.py
+            APP_HOST: 0.0.0.0
+            APP_PORT: 8000
+            POSTGRES_HOST: postgres
+            POSTGRES_PORT: 5432
+            REDIS_HOST: redis
+            REDIS_PORT: 6379
+            JAEGER_HOST: jaeger
+            JAEGER_UDP_PORT: 6831
+        healthcheck:
+            test: [ "CMD", "./scripts/wait-for-it.sh", "app:8000" ]
+            <<: *common-healthcheck
         depends_on:
-            - postgres
-            - redis
-            - jaeger
+            postgres:
+                condition: service_healthy
+            redis:
+                condition: service_started
+        profiles:
+            - default
+
     postgres:
+        <<: *base-service
         build:
             context: .
             dockerfile: ./docker/postgres/Dockerfile
-        restart: on-failure
-        env_file:
-            - ./.envs/${ENVIRONMENT:-production}/.env
+            args:
+                - img=${POSTGRES_IMG}
+        env_file: .env
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        healthcheck:
+            test: [ "CMD", "./scripts/wait-for-it.sh", "postgres:5432" ]
+            <<: *common-healthcheck
+        profiles:
+            - default
+            - db
+
     redis:
+        <<: *base-service
         build:
             context: .
             dockerfile: ./docker/redis/Dockerfile
-        restart: on-failure
-        env_file:
-            - ./.envs/${ENVIRONMENT:-production}/.env
-    nginx:
-        build:
-            context: .
-            dockerfile: ./docker/nginx/Dockerfile
-        restart: on-failure
-        env_file:
-            - ./.envs/${ENVIRONMENT:-production}/.env
-        environment:
-            - APP_HOST=app
+            args:
+                - img=${REDIS_IMG}
         volumes:
-            - ./src/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-            - ./src/nginx/templates:/etc/nginx/templates:ro
-        depends_on:
-            - app
+            - redis_data:/data
+        profiles:
+            - default
+            - db
+
     jaeger:
+        <<: *base-service
         build:
             context: .
             dockerfile: ./docker/jaeger/Dockerfile
-        restart: on-failure
+            args:
+                - img=${JAEGER_IMG}
+        environment:
+            - SPAN_STORAGE_TYPE=badger
+            - BADGER_EPHEMERAL=false
+            - BADGER_DIRECTORY_VALUE=/badger/data
+            - BADGER_DIRECTORY_KEY=/badger/key
+        ports:
+            - ${JAEGER_TCP_PORT}:16686
+            - ${JAEGER_UDP_PORT}:6831/udp
+        volumes:
+            - jaeger_data:/badger
+        profiles:
+            - default
+            - db
+
+volumes:
+    postgres_data:
+    redis_data:
+    jaeger_data:

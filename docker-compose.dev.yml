@@ -1,42 +1,24 @@
+x-base-dev-service: &base-dev-service
+    restart: "no"
+
 services:
     app:
-        restart: "no"
+        <<: *base-dev-service
         environment:
             - ENVIRONMENT=development
             - FLASK_DEBUG=1
         volumes:
-            - ./src:/src
+            - ./src/movies_auth:/app/src/movies_auth
+
     postgres:
-        restart: "no"
-        volumes:
-            - pgdata_dev:/var/lib/postgresql/data
+        <<: *base-dev-service
         ports:
             - ${POSTGRES_PORT}:5432
+
     redis:
-        restart: "no"
-        volumes:
-            - redis_dev:/data
+        <<: *base-dev-service
         ports:
             - ${REDIS_PORT}:6379
-    nginx:
-        restart: "no"
-        environment:
-            - APP_LISTEN_PORT=${APP_PORT}
-        ports:
-            - ${APP_PORT}:${APP_PORT}
+
     jaeger:
-        restart: "no"
-        ports:
-            - 6831:6831/udp
-            - ${JAEGER_TCP_PORT}:16686
-        environment:
-            - SPAN_STORAGE_TYPE=badger
-            - BADGER_EPHEMERAL=false
-            - BADGER_DIRECTORY_VALUE=/badger/data
-            - BADGER_DIRECTORY_KEY=/badger/key
-        volumes:
-            - jaeger_dev:/badger
-volumes:
-    pgdata_dev:
-    redis_dev:
-    jaeger_dev:
+        <<: *base-dev-service

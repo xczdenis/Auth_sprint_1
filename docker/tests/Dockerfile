@@ -1,23 +1,42 @@
-ARG env=${ENVIRONMENT:-production}
+ARG img=python:3.11-slim
+ARG work_dir=app
 
-FROM app-movies-auth-img as builder
+FROM ${img} as base
 
-ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    POETRY_VERSION=1.5.0
 
-ARG HOME_DIR=/src
-WORKDIR $HOME_DIR
+ARG work_dir
 
-RUN poetry config virtualenvs.create false \
-    && poetry install --only tests
+WORKDIR ${work_dir}
 
-COPY ./docker/tests/scripts /scripts
-RUN chmod -R 777 /scripts
 
-FROM builder as development
+FROM base as builder
 
-FROM builder as production
-COPY ./src .
+COPY ./scripts ./scripts
+COPY ./docker/tests/scripts ./scripts
+RUN chmod -R 777 ./scripts
 
-FROM ${env}
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        python3-dev \
+        libpq-dev \
+        build-essential \
+    && pip install poetry==${POETRY_VERSION} \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-ENTRYPOINT ["/scripts/entrypoint.sh"]
+COPY pyproject.toml poetry.lock README.md ./
+COPY ./src ./src
+COPY ./tests ./tests
+
+RUN poetry config virtualenvs.in-project true \
+    && poetry install --only main,tests
+
+
+FROM base
+
+COPY --from=builder /${work_dir} /${work_dir}
+
+ENTRYPOINT ["./scripts/entrypoint.sh"]

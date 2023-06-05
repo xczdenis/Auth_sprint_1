@@ -42,7 +42,7 @@ YANDEX_OAUTH__USERINFO_URL=info
 ```
 Для этого, провайдер должен быть добавлен в `settings` следующим образом:
 ```python hl_lines="15"
-# src/config.py
+# src/settings.py
 
 
 class BaseOAuthProvider(BaseModel):

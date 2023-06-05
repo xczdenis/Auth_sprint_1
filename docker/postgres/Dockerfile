@@ -1,10 +1,5 @@
-ARG env=${ENVIRONMENT:-production}
+ARG img=postgres:15.3-alpine
 
-FROM postgres:14.3-alpine as builder
+FROM ${img}
 
-FROM builder as development
-EXPOSE 5432
-
-FROM builder as production
-
-FROM ${env}
+COPY ./scripts ./scripts
