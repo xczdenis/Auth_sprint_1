@@ -10,7 +10,7 @@ from alembic import op
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-from app.models import DeviceType
+from movies_auth.app.models import DeviceType
 
 revision = "8d1b2ecedaf9"
 down_revision = None
