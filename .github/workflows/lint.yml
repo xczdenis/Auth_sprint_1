@@ -1,60 +1,3 @@
-#name: Lint workflow
-#
-#on:
-#    pull_request:
-#
-#jobs:
-#    lint-flake8:
-#        name: Lint by flake8
-#        runs-on: ubuntu-latest
-#        strategy:
-#            matrix:
-#                python-version: [ "3.11" ]
-#        steps:
-#            -   name: Checkout code
-#                uses: actions/checkout@v3
-#            -   name: Install poetry
-#                run: curl -sSL https://install.python-poetry.org | python3 - --version 1.2.0rc2
-#            -   name: Set up Python ${{ matrix.python-version }}
-#                uses: actions/setup-python@v4
-#                with:
-#                    python-version: ${{ matrix.python-version }}
-#            -   name: Install lint dependencies
-#                run: poetry install --only lint
-#            -   name: Lint by flake8
-#                run: poetry run flake8
-#
-#    lint-black:
-#        name: Lint by black
-#        runs-on: ubuntu-latest
-#        strategy:
-#            matrix:
-#                python-version: [ "3.11" ]
-#        steps:
-#            -   name: Checkout code
-#                uses: actions/checkout@v3
-#            -   name: Lint by black
-#                uses: psf/black@stable
-#                with:
-#                    options: "--check"
-#                    src: "."
-#
-#    tg-notify:
-#        name: tg-notify
-#        runs-on: ubuntu-latest
-#        steps:
-#            -   name: send telegram message on push
-#                uses: appleboy/telegram-action@master
-#                with:
-#                    to: ${{ secrets.TELEGRAM_TO }}
-#                    token: ${{ secrets.TELEGRAM_TOKEN }}
-#                    message: |
-#                        ${{ github.actor }} created commit:
-#                        Commit message: ${{ github.event.commits[0].message }}
-#
-#                        Repository: ${{ github.repository }}
-#
-#                        See changes: https://github.com/${{ github.repository }}/commit/${{github.sha}}
 name: Lint and tests
 
 on:
@@ -118,20 +61,20 @@ jobs:
             -   name: Run tests in docker
                 run: docker-compose -f docker-compose.yml -f docker-compose.test.yml --profile default --profile tests run tests
 
-    tg-notify:
-        name: tg-notify
-        runs-on: ubuntu-latest
-        needs: [lint-black, lint-flake8, tests-with-docker]
-        steps:
-            -   name: send telegram message on push
-                uses: appleboy/telegram-action@master
-                with:
-                    to: ${{ secrets.TELEGRAM_TO }}
-                    token: ${{ secrets.TELEGRAM_TOKEN }}
-                    message: |
-                        ${{ github.actor }} created commit:
-                        Commit message: ${{ github.event.commits[0].message }}
-
-                        Repository: ${{ github.repository }}
-
-                        See changes: https://github.com/${{ github.repository }}/commit/${{github.sha}}
+#    tg-notify:
+#        name: tg-notify
+#        runs-on: ubuntu-latest
+#        needs: [lint-black, lint-flake8, tests-with-docker]
+#        steps:
+#            -   name: send telegram message on push
+#                uses: appleboy/telegram-action@master
+#                with:
+#                    to: ${{ secrets.TELEGRAM_TO }}
+#                    token: ${{ secrets.TELEGRAM_TOKEN }}
+#                    message: |
+#                        ${{ github.actor }} created commit:
+#                        Commit message: ${{ github.event.commits[0].message }}
+#
+#                        Repository: ${{ github.repository }}
+#
+#                        See changes: https://github.com/${{ github.repository }}/commit/${{github.sha}}
