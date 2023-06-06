@@ -1,4 +1,4 @@
-<a href="https://www.djangoproject.com" target="_blank">
+<a href="https://github.com/pallets/flask" target="_blank">
     <img src="https://img.shields.io/static/v1?label=Flask&message=latest&color=%23000000&style=flat&logo=flask" alt="Flask">
 </a>
 <a href="https://github.com/flasgger/flasgger" target="_blank">
