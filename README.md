@@ -1,3 +1,29 @@
+<a href="https://www.djangoproject.com" target="_blank">
+    <img src="https://img.shields.io/static/v1?label=Flask&message=latest&color=%23000000&style=flat&logo=flask" alt="Flask">
+</a>
+<a href="https://github.com/flasgger/flasgger" target="_blank">
+    <img src="https://img.shields.io/static/v1?label=swagger&message=3.0&color=%2385EA2D&style=flat&logo=swagger" alt="Swagger">
+</a>
+<a href="#" target="_blank">
+    <img src="https://img.shields.io/static/v1?label=OAuth&message=2.0&color=%23EB5424&style=flat&logo=Auth0" alt="OAuth2.0">
+</a>
+<a href="#" target="_blank">
+    <img src="https://img.shields.io/static/v1?label=Postgre&message=15&color=%234169E1&style=flat&logo=postgresql" alt="postgresql">
+</a>
+<a href="https://www.docker.com/" target="_blank">
+    <img src="https://img.shields.io/static/v1?label=Docker&message=23&color=%232496ED&style=flat&logo=docker" alt="Docker">
+</a>
+<a href="#">
+    <img src="https://img.shields.io/static/v1?label=python&message=3.11^&color=%233674a8&style=flat&logo=python" alt="Supported Python versions">
+</a>
+<a href="https://black.readthedocs.io/en/stable/">
+    <img src="https://img.shields.io/static/v1?label=code-style&message=black&color=black&style=flat&logo=python" alt="Supported Python versions">
+</a>
+<a href="https://python-poetry.org/">
+    <img src="https://img.shields.io/static/v1?label=package manager&message=poetry&color=%234c58ce&style=flat&logo=poetry" alt="Python Poetry">
+</a>
+
+
 # Auth-movies
 
 
