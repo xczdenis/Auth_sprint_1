@@ -1,57 +1,80 @@
-name: Lint workflow
+name: Lint and tests
 
 on:
     pull_request:
 
 jobs:
-    lint-flake8:
-        name: Lint by flake8
-        runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                python-version: [ "3.11" ]
-        steps:
-            -   name: Checkout code
-                uses: actions/checkout@v3
-            -   name: Install poetry
-                run: curl -sSL https://install.python-poetry.org | python3 - --version 1.2.0rc2
-            -   name: Set up Python ${{ matrix.python-version }}
-                uses: actions/setup-python@v4
-                with:
-                    python-version: ${{ matrix.python-version }}
-            -   name: Install lint dependencies
-                run: poetry install --only lint
-            -   name: Lint by flake8
-                run: poetry run flake8
-
     lint-black:
         name: Lint by black
         runs-on: ubuntu-latest
-        strategy:
-            matrix:
-                python-version: [ "3.11" ]
         steps:
             -   name: Checkout code
                 uses: actions/checkout@v3
-            -   name: Lint by black
+            -   name: Lint src by black
                 uses: psf/black@stable
                 with:
                     options: "--check"
-                    src: "."
+                    src: "./src"
+            -   name: Lint tests by black
+                uses: psf/black@stable
+                with:
+                    options: "--check"
+                    src: "./tests"
 
-    tg-notify:
-        name: tg-notify
+    lint-flake8:
+        name: Lint by flake8
         runs-on: ubuntu-latest
         steps:
-            -   name: send telegram message on push
-                uses: appleboy/telegram-action@master
+            -   name: Checkout code
+                uses: actions/checkout@v3
+            -   name: Lint src by flake8
+                uses: py-actions/flake8@v2
                 with:
-                    to: ${{ secrets.TELEGRAM_TO }}
-                    token: ${{ secrets.TELEGRAM_TOKEN }}
-                    message: |
-                        ${{ github.actor }} created commit:
-                        Commit message: ${{ github.event.commits[0].message }}
+                    max-line-length: "110"
+                    path: "src"
+                    plugins: "flake8-comprehensions flake8-quotes pep8-naming flake8-bandit flake8-black"
+            -   name: Lint tests by flake8
+                uses: py-actions/flake8@v2
+                with:
+                    max-line-length: "110"
+                    path: "tests"
+                    plugins: "flake8-comprehensions flake8-quotes pep8-naming flake8-bandit flake8-black"
 
-                        Repository: ${{ github.repository }}
+    tests-with-docker:
+        name: Tests with docker
+        runs-on: ubuntu-latest
+        env:
+            COMPOSE_PROJECT_NAME: movies_auth
+            ENVIRONMENT: production
+            DOCKER_BUILDKIT: 1
+        steps:
+            -   name: Checkout
+                uses: actions/checkout@v3
 
-                        See changes: https://github.com/${{ github.repository }}/commit/${{github.sha}}
+            -   name: Create env file
+                run: printf "${{ secrets.ENVS_PROD }}" >> .env
+
+            -   name: Build docker-compose images
+                run: |
+                    docker-compose -f docker-compose.yml -f docker-compose.test.yml --profile default --profile tests build
+
+            -   name: Run tests in docker
+                run: docker-compose -f docker-compose.yml -f docker-compose.test.yml --profile default --profile tests run tests
+
+#    tg-notify:
+#        name: tg-notify
+#        runs-on: ubuntu-latest
+#        needs: [lint-black, lint-flake8, tests-with-docker]
+#        steps:
+#            -   name: send telegram message on push
+#                uses: appleboy/telegram-action@master
+#                with:
+#                    to: ${{ secrets.TELEGRAM_TO }}
+#                    token: ${{ secrets.TELEGRAM_TOKEN }}
+#                    message: |
+#                        ${{ github.actor }} created commit:
+#                        Commit message: ${{ github.event.commits[0].message }}
+#
+#                        Repository: ${{ github.repository }}
+#
+#                        See changes: https://github.com/${{ github.repository }}/commit/${{github.sha}}

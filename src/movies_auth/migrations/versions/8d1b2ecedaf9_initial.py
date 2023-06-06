@@ -12,6 +12,7 @@ from sqlalchemy.dialects import postgresql
 # revision identifiers, used by Alembic.
 from movies_auth.app.models import DeviceType
 
+
 revision = "8d1b2ecedaf9"
 down_revision = None
 branch_labels = None
@@ -226,9 +227,7 @@ def upgrade():
             ["permissions.id"],
             name=op.f("fk_users_permissions_permission_id_permissions"),
         ),
-        sa.ForeignKeyConstraint(
-            ["user_id"], ["users.id"], name=op.f("fk_users_permissions_user_id_users")
-        ),
+        sa.ForeignKeyConstraint(["user_id"], ["users.id"], name=op.f("fk_users_permissions_user_id_users")),
     )
 
     attach_partitions("entry_records")
