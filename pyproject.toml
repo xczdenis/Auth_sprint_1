@@ -63,7 +63,7 @@ mkdocs-material = "^9.1.14"
 
 [tool.black]
 line-length = 110
-
+exclude = '/(\.git|\.venv|\.eggs|build|dist|migrations)/'
 
 [tool.isort]
 line_length = 110
