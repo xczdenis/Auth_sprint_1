@@ -1,7 +1,7 @@
 ARG env=production
 ARG img=python:3.11-slim
 ARG work_dir=app
-ARG pck_name=movies_auth
+ARG pckg_name=movies_auth
 
 FROM ${img} as base
 
@@ -11,7 +11,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 ARG env
 ARG work_dir
-ARG pck_name
+ARG pckg_name
 
 WORKDIR ${work_dir}
 
@@ -19,7 +19,7 @@ WORKDIR ${work_dir}
 FROM base as builder
 
 COPY ./scripts ./scripts
-COPY ./docker/${pck_name}/scripts ./scripts
+COPY ./docker/${pckg_name}/scripts ./scripts
 RUN chmod -R 777 ./scripts
 
 RUN apt-get update \
@@ -33,7 +33,7 @@ RUN apt-get update \
 
 COPY pyproject.toml poetry.lock README.md ./
 
-RUN mkdir -p /${work_dir}/src/${pck_name} && touch /${work_dir}/src/${pck_name}/__init__.py
+RUN mkdir -p /${work_dir}/src/${pckg_name} && touch /${work_dir}/src/${pckg_name}/__init__.py
 
 RUN poetry config virtualenvs.in-project true \
     && poetry install --only main
@@ -50,7 +50,7 @@ FROM final as development
 
 FROM final as production
 
-COPY ./src/${pck_name} ./src/${pck_name}
+COPY ./src/${pckg_name} ./src/${pckg_name}
 
 
 FROM ${env}

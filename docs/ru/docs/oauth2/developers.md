@@ -5,7 +5,7 @@
 
 
 ## Intro
-Все, что необходимо для работы с OAuth2 находится в папке `src/app/oauth2`.
+Все, что необходимо для работы с OAuth2 находится в папке `src/movies_auth/app/oauth2`.
 
 ## Requirements
 Используется библиотека [authlib](https://github.com/lepture/authlib)
@@ -65,7 +65,7 @@ class Settings(BaseSettings):
 
 Для примера рассмотрим адаптер `GoogleOAuthProvider`:
 ```python
-# src/app/oauth2/base.py
+# src/movies_auth/app/oauth2/base.py
 
 
 @dataclass
@@ -92,7 +92,7 @@ class GoogleOAuthProvider(BaseOAuthProvider):
 Для добавления нового провайдера нужно создать для него адаптер - наследник класса
 `BaseOAuthProvider`. Имя нового провайдера нужно указать в классе `OAuthProviders`:
 ```python
-# src/app/oauth2/base.py
+# src/movies_auth/app/oauth2/base.py
 
 
 @dataclass(slots=True, frozen=True)
@@ -134,9 +134,9 @@ class MailOAuthProvider(BaseOAuthProvider):
 
 ## Регистрация провайдера
 Для того чтобы провайдер начал действовать, его нужно зарегистрировать в приложении.
-Сначала нужно создать экземпляр провайдера в файле `src/app/oauth2/__init__.py`:
+Сначала нужно создать экземпляр провайдера в файле `src/movies_auth/app/oauth2/__init__.py`:
 ```python
-# src/app/oauth2/__init__.py
+# src/movies_auth/app/oauth2/__init__.py
 
 from app.oauth2 import base
 
@@ -148,7 +148,7 @@ google_oauth = base.GoogleOAuthProvider()
 ```
 Затем, в функции `create_app()` нужно зарегистрировать нового провайдера:
 ```python hl_lines="11-13"
-# src/app/__init__.py
+# src/movies_auth/app/__init__.py
 
 from app.oauth2 import oauth_manager, yandex_oauth, mail_oauth, google_oauth
 

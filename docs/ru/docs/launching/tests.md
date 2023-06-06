@@ -1,26 +1,26 @@
 # Запуск тестов
-Тесты можно запускать в двух режимах: интерактивно и в режиме демона.
-Запускать тесты в режиме демона удобно для отладки: ты можешь подключить сервис Docker в PyCharm,
-запустить тесты, изменить код теста и перезапустить контейнер с тестами с помощью PyCharm
-(кнопка Start справа вверху) - это не затронет твой терминал и не нужно будет
-выполнять лишние команды:
-![test-container-in-pycharm](../img/PyCharm/test-container-in-pycharm.png)
+Тесты можно запускать в двух режимах: локально и в докере.
 
-## Запустить тесты в режиме демона
+
+## Запустить тесты в докере
+
+Запустить тесты в докере (логи будут выведены в консоли):
 === "Make"
 
     <div class="termy">
 
     ```console
-    $ make test
+    $ make tests-docker
 
     ---> 100%
-    Creating movies_auth-test_postgres_1  ... <span style="color: green;">done</span>
-    Creating movies_auth-test_jaeger_1    ... <span style="color: green;">done</span>
-    Creating movies_auth-test_redis_1     ... <span style="color: green;">done</span>
-    Creating movies_auth-test_app_1       ... <span style="color: green;">done</span>
-    Creating movies_auth-test_tests_app_1 ... <span style="color: green;">done</span>
-    Creating movies_auth-test_nginx_1     ... <span style="color: green;">done</span>
+
+     ::TestSignin...     <span style="color: green;">PASSED         [  5%]</span>
+     ::TestSignup...     <span style="color: green;">PASSED         [ 10%]</span>
+     ::TestRefresh...    <span style="color: green;">PASSED         [ 15%]</span>
+     ::TestLogout...     <span style="color: green;">PASSED         [ 20%]</span>
+     ...
+     tests...            <span style="color: green;">PASSED         [100%]</span>
+
     ```
 
     </div>
@@ -30,26 +30,48 @@
     <div class="termy">
 
     ```console
-    $ docker-compose -f docker-compose.yml -f docker-compose.test.yml -f docker-compose.test.dev.yml up -d --build
+    $ docker-compose -f docker-compose.yml -f docker-compose.test.yml --profile default --profile tests build
+    $ docker-compose -f docker-compose.yml -f docker-compose.test.yml --profile default --profile tests run tests
+
 
     ---> 100%
-    Creating movies_auth_postgres_1     ... <span style="color: green;">done</span>
-    Creating movies_auth_jaeger_1       ... <span style="color: green;">done</span>
-    Creating movies_auth_redis_1        ... <span style="color: green;">done</span>
-    Creating movies_auth_app_1          ... <span style="color: green;">done</span>
-    Creating movies_auth_tests_app_1    ... <span style="color: green;">done</span>
-    Creating movies_auth_nginx_1        ... <span style="color: green;">done</span>
+
+     ::TestSignin...     <span style="color: green;">PASSED         [  5%]</span>
+     ::TestSignup...     <span style="color: green;">PASSED         [ 10%]</span>
+     ::TestRefresh...    <span style="color: green;">PASSED         [ 15%]</span>
+     ::TestLogout...     <span style="color: green;">PASSED         [ 20%]</span>
+     ...
+     tests...            <span style="color: green;">PASSED         [100%]</span>
+
     ```
 
     </div>
 
-## Посмотреть логи тестов
+
+
+## Запустить тесты локально
+
+!!! warning "Выполни `make run` перед запуском тестов локально"
+    Для локального запуска тестов требуются запущенные контейнеры с базой данных и Redis. Поэтому перед
+    локальным запуском тестов, выполни команду `make run`.
+
+Запустить тесты локально:
 === "Make"
 
     <div class="termy">
 
     ```console
-    $ make test-logs s=tests_app
+    $ make tests
+
+    ---> 100%
+
+     ::TestSignin...     <span style="color: green;">PASSED         [  5%]</span>
+     ::TestSignup...     <span style="color: green;">PASSED         [ 10%]</span>
+     ::TestRefresh...    <span style="color: green;">PASSED         [ 15%]</span>
+     ::TestLogout...     <span style="color: green;">PASSED         [ 20%]</span>
+     ...
+     tests...            <span style="color: green;">PASSED         [100%]</span>
+
     ```
 
     </div>
@@ -59,64 +81,21 @@
     <div class="termy">
 
     ```console
-    $ docker-compose -f docker-compose.yml -f docker-compose.test.yml logs tests_app
+    $ python -m pytest
+
+    ---> 100%
+
+     ::TestSignin...     <span style="color: green;">PASSED         [  5%]</span>
+     ::TestSignup...     <span style="color: green;">PASSED         [ 10%]</span>
+     ::TestRefresh...    <span style="color: green;">PASSED         [ 15%]</span>
+     ::TestLogout...     <span style="color: green;">PASSED         [ 20%]</span>
+     ...
+     tests...            <span style="color: green;">PASSED         [100%]</span>
+
     ```
 
     </div>
 
-
-## Запустить тесты интерактивно
-При запуске тестов интерактивно, логи будут выведены в терминале.
-Запуск тестов интерактивно с помощью `make`:
-<div class="termy">
-
-```console
-$ make test-it
-```
-
-</div>
-
-Для запуска тестов интерактивно без `make`, нужно сначала сбилдить образы, а затем запустить
-контейнер с тестами.
-
-Сбилдить образы:
-<div class="termy">
-
-```console
-$ docker-compose -f docker-compose.yml -f docker-compose.test.yml build
-```
-
-</div>
-
-Запустить тесты:
-<div class="termy">
-
-```console
-$ docker-compose -f docker-compose.yml -f docker-compose.test.yml run tests_app
-```
-
-</div>
-
-## Остановить запущенные контейнеры тестов
-=== "Make"
-
-    <div class="termy">
-
-    ```console
-    $ make test-stop
-    ```
-
-    </div>
-
-=== "Native"
-
-    <div class="termy">
-
-    ```console
-    $ docker-compose -f docker-compose.yml -f docker-compose.test.yml stop
-    ```
-
-    </div>
 
 ## Остановить и удалить запущенные контейнеры тестов
 === "Make"
@@ -124,7 +103,7 @@ $ docker-compose -f docker-compose.yml -f docker-compose.test.yml run tests_app
     <div class="termy">
 
     ```console
-    $ make test-down
+    $ make down
     ```
 
     </div>
@@ -139,50 +118,3 @@ $ docker-compose -f docker-compose.yml -f docker-compose.test.yml run tests_app
 
     </div>
 
-## Проверить конфигурацию тестов
-=== "Make"
-
-    <div class="termy">
-
-    ```console
-    $ make test-check
-    ```
-
-    </div>
-
-=== "Native"
-
-    <div class="termy">
-
-    ```console
-    $ docker-compose -f docker-compose.yml -f docker-compose.test.yml -f docker-compose.test.dev.yml config
-    ```
-
-    </div>
-
-## Запустить тесты локально
-!!!warning
-    Для локального запуска тестов необходимо, чтобы были запущены:
-
-    * База данных (сервис `postgres`);
-    * Редис (сервис `redis`);
-    * Егерь (сервис `jaeger`).
-Для корректного прохождения тестов, нужно чтобы были применены все миграции:
-```bash
-export FLASK_APP=main.py
-cd src
-python -m flask db upgrade
-```
-Для запуска тестов, выполни следующую команду, из корневой директории проекта:
-<div class="termy">
-
-```console
-$ pytest src
-
-... test_empty_data <span style="color: green;">PASSED</span>      <span style="color: green;">[  5%]</span>
-... test_wrong_data <span style="color: green;">PASSED</span>      <span style="color: green;">[ 11%]</span>
-...
-... test_new_user <span style="color: green;">PASSED</span>        <span style="color: green;">[100%]</span>
-```
-
-</div>

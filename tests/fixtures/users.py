@@ -10,7 +10,7 @@ def non_existent_user() -> User:
     unique_user_login = faker.unique_user_login()
     pwd = "pwd!"
 
-    user = faker.app_user(login=unique_user_login, password=pwd)
+    user = faker.app_user(unique_user_login, pwd)
 
     yield user
 
@@ -22,7 +22,7 @@ def existing_user_and_his_password() -> tuple[User, str]:
     unique_user_login = faker.unique_user_login()
     password = "Password123!"
 
-    user = faker.app_user(login=unique_user_login, password=password)
+    user = faker.app_user(unique_user_login, password)
     user.save()
 
     yield user, password

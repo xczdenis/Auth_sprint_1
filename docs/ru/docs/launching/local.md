@@ -6,7 +6,7 @@
     === "Make"
 
         ```bash
-        $ make dev s="postgres redis"
+        $ make run s="postgres redis"
         ```
 
     === "Native"
@@ -17,24 +17,81 @@
 
 !!! success "Action"
     Для запуска приложения локально требуется установить переменную среды `FLASK_APP`
-    в значение `manage.py`:
+    в значение `src/movies_auth/main.py`:
     ```bash
-    export FLASK_APP=manage.py
+    export FLASK_APP=src/movies_auth/main.py
     ```
 
-Проверь, что у тебя не запущен контейнер `nginx` т.к. он запускается на порту 5000 и приложение
-тоже запускается на порту 5000. Если контейнер nginx будет запущен, то приложение локально
-уже не запустится т.к. порт 5000 будет занят. Также не должен быть запущен контейнер `app`.
-
-Для запуска приложения локально перейди в каталог `src`:
-```bash
-cd src
-```
 Выполни миграции:
-```bash
-python -m flask db upgrade
-```
+=== "Make"
+
+    <div class="termy">
+
+    ```console
+    $ make db-upgrade
+
+    ---> 100%
+
+     INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+     INFO  [alembic.runtime.migration] Will assume transactional DDL.
+
+    ```
+
+    </div>
+
+=== "Native"
+
+    <div class="termy">
+
+    ```console
+    $ python -m flask db upgrade
+
+    ---> 100%
+
+     INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+     INFO  [alembic.runtime.migration] Will assume transactional DDL.
+
+    ```
+
+    </div>
+
 Запусти приложение:
-```bash
-python main.py
-```
+=== "Make"
+
+    <div class="termy">
+
+    ```console
+    $ make run-local
+
+    ---> 100%
+
+     <span style="color: red;"><b>WARNING: This is a development server. Do not use it ...</b></span>
+      * Running on <span style="color: #00b0ff;">http://localhost:5001</span>
+     <span style="color: orange;">Press CTRL+C to quit</span>
+      * Restarting with watchdog (fsevents)
+      * Debugger is active!
+      * Debugger PIN: 132-336-641
+
+    ```
+
+    </div>
+
+=== "Native"
+
+    <div class="termy">
+
+    ```console
+    $ python src/movies_auth/main.py
+
+    ---> 100%
+
+     <span style="color: red;"><b>WARNING: This is a development server. Do not use it ...</b></span>
+      * Running on <span style="color: #00b0ff;">http://localhost:5001</span>
+     <span style="color: orange;">Press CTRL+C to quit</span>
+      * Restarting with watchdog (fsevents)
+      * Debugger is active!
+      * Debugger PIN: 132-336-641
+
+    ```
+
+    </div>

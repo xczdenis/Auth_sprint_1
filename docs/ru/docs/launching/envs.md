@@ -1,34 +1,100 @@
-# Переменные окружения
-В проекте используются 2 вида переменных окружения - локальные переменные и переменные для
-использования внутри docker контейнеров.
+# Окружения dev и prod
 
-Первое, что нужно сделать, после создания форка репозитория - настроить переменные окружения.
-Для этого нужно создать файлы `.env`. Для каждого файла `.env` имеется свой файл `.env.template`.
+Основной тип запуска проекта - через docker-compose. Запуск проекта может быть выполнен в одном
+из двух окружений: `development` или `production`. Окружение управляется настройкой `ENVIRONMENT` в
+файле `.env`:
+```bash
+ENVIRONMENT=development
+```
 
-## Локальные переменные окружения
-!!! success "Action"
-    Создай файл `.env` в корне проекта - здесь хранятся локальные переменные окружения.
+Если настройка `ENVIRONMENT` имеет значение `production`, то при запуске используется файл
+`docker-compose.yml`. Если настройка `ENVIRONMENT` имеет значение `development`, то при
+запуске используется дополнительный файл `docker-compose.dev.yml`.
 
-Локальные переменные окружения - это переменные хоста, они используются для запуска с помощью
-docker-compose. Здесь хранятся переменные, которые используются на этапе сборки docker-compose,
-а не внутри контейнера. Например, здесь ты можешь указать порт базы данных, который будет смотреть
-наружу.
+При запуске в режиме `development` папка приложения `src` монтируется как том, а каждый сервис
+имеет `expose` порты:
+```dockerfile
+# docker-compose.dev.yml
 
-!!! tip
-    Допустим у тебя занят порт 5432 - на нем уже запущена база данных Postgres для другого проекта.
-    Укажи в корневом файле `.env` любой другой порт для переменной `POSTGRES_PORT` - это expose
-    порт для базы данных, он смотрит наружу (см. файл `docker-compose.dev.yml`).
+x-base-dev-service: &base-dev-service
+    restart: "no"
 
-## Переменные окружения в папке .envs
-!!! success "Action"
-    Создай файлы `.env` в каталогах `development` и `production` в папке `.envs`.
+services:
+    postgres:
+        <<: *base-dev-service
+        ports:
+            - ${POSTGRES_PORT}:5432
 
-Папка `.envs` содержит файлы `.env` со всеми переменными окружения, которые используются в проекте.
-В отличие от локальных переменных, переменные в папке `.envs` используются внутри контейнера.
-Например, порт для postgres (переменная `POSTGRES_PORT`) здесь должен быть тот, на котором стартует
-postgres внутри контейнера - это порт 5432.
+    redis:
+        <<: *base-dev-service
+        ports:
+            - ${REDIS_PORT}:6379
+```
 
-Папка `.envs` содержит 2 каталога:
 
-* **development**: переменные окружения для запуска в режиме разработки;
-* **production**: переменные окружения для запуска в production режиме.
+## Один Dockerfile для двух окружений
+
+Стоит обратить внимание на `Dockerfile` для `Flask` приложения. Помимо `multistage` сборки, данный файл
+использует слои `development` и `production` в соответствии с
+настройкой `ENVIRONMENT`:
+```dockerfile
+# ./docker/movies_auth/Dockerfile
+
+ARG env=production
+...
+
+FROM final as development
+
+
+FROM final as production
+
+COPY ./src/${pckg_name} ./src/${pckg_name}
+
+
+FROM ${env}
+
+ENTRYPOINT ["./scripts/entrypoint.sh"]
+```
+
+Данная конфигурация позволяет использовать разные итоговые образы в зависимости от режима запуска. При запуске
+в режиме `development` папка приложения [src](src) монтируется как том в файле [docker-compose.dev.yml](docker-compose.dev.yml),
+поэтому слой `development` в `Dockerfile` пустой:
+```dockerfile
+# ./docker/movies_auth/Dockerfile
+...
+
+FROM final as development
+
+...
+```
+При запуске в окружении `production` папка приложения [src](src) копируется с помощью инструкции `COPY`:
+```dockerfile
+# ./docker/movies_auth/Dockerfile
+...
+
+FROM final as production
+
+COPY ./src/${pckg_name} ./src/${pckg_name}
+```
+В конце файла, выбирается образ из переменной `env`:
+```dockerfile
+# ./docker/python/Dockerfile
+ARG env=production
+...
+
+FROM ${env}
+```
+
+Переменная `env` в свою очередь передается как аргумент сборки:
+```dockerfile
+# ./docker-compose.yml
+services:
+    app:
+        build:
+            context: .
+            dockerfile: ./docker/movies_auth/Dockerfile
+            args:
+                - env=${ENVIRONMENT}
+```
+Итоговый образ будет использовать самый последний слой. Таким образом, если настройка `ENVIRONMENT` имеет
+значение `development`, то будет использован образ `development`, а если `production`, то `production`.
