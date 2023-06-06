@@ -10,9 +10,9 @@ Auth-movies - это API сервис авторизации, который о�
 
 <hr>
 
-💻 **Исходный код**: <a target="_blanc" href="https://github.com/xczdenis/auth_movies">https://github.com/xczdenis/auth_movies</a>
+💻 **Исходный код**: <a target="_blanc" href="https://github.com/xczdenis/movies_auth">https://github.com/xczdenis/movies_auth</a>
 
-📖 **Документация**: <a target="_blanc" href="https://xczdenis.github.io/auth_movies">https://xczdenis.github.io/auth_movies</a>
+📖 **Документация**: <a target="_blanc" href="https://xczdenis.github.io/movies_auth">https://xczdenis.github.io/movies_auth</a>
 
 📝 **Open API**:  <a href="#api">http://127.0.0.1:5001/api/v1/swagger</a>
 
