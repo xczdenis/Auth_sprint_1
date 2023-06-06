@@ -4,7 +4,7 @@ on:
     pull_request:
 
 jobs:
-    test:
+    tests-with-docker:
         name: Tests with docker
         runs-on: ubuntu-latest
         env:
